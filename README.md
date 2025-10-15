@@ -1,280 +1,272 @@
 # Intrusion Detection System (IDS)
 
-A Python-based network intrusion detection system that monitors network traffic in real-time to detect security threats and automatically sends email notifications with detailed analysis and remediation recommendations.
+A comprehensive Python-based network intrusion detection system that monitors network traffic in real-time to detect security threats and automatically sends email notifications with detailed analysis and remediation recommendations.
 
-## Features
+## 📚 Documentation
 
-- **Real-time Threat Detection**: Monitors network traffic for various attack patterns
-- **Multiple Detection Types**: Port scans, ICMP scans, brute force attacks, malware, data exfiltration
-- **Automated Email Alerts**: Sends detailed notifications with severity levels and remediation steps
-- **Configurable Thresholds**: Customizable detection sensitivity and notification settings
+- **[HOW_TO_RUN.md](HOW_TO_RUN.md)** - Detailed step-by-step setup and usage instructions
+- **[DOCUMENTATION.md](DOCUMENTATION.md)** - Complete technical documentation and API reference
+- **[SYSTEMD_DEPLOYMENT.md](SYSTEMD_DEPLOYMENT.md)** - Linux systemd service deployment guide
+
+## 🚀 Quick Start
+
+```bash
+# 1. Install dependencies
+pip install -r requirements.txt
+
+# 2. Configure
+cp config.yaml.example config.yaml
+# Edit config.yaml with your settings
+
+# 3. Run (requires root/admin privileges)
+sudo python3 ids_main.py --config config.yaml
+```
+
+For detailed instructions, see [HOW_TO_RUN.md](HOW_TO_RUN.md).
+
+## ✨ Features
+
+### 🔍 Threat Detection
+- **Real-time Network Monitoring**: Continuous packet capture and analysis
+- **Multi-threat Detection**: Port scans, brute force attacks, malware, data exfiltration, ICMP scans
+- **Behavioral Analysis**: Attacker identification and pattern recognition
+- **Configurable Thresholds**: Customizable detection sensitivity
+
+### 📧 Alerting & Notifications
+- **Automated Email Alerts**: Rich HTML notifications with threat details
+- **Severity Classification**: Intelligent threat severity assessment
+- **Batch Notifications**: Smart batching to prevent email flooding
+- **Multiple Recipients**: Support for distribution lists
+
+### 🛠️ Deployment & Management
+- **Cross-platform Support**: Linux, Windows, macOS
+- **Systemd Integration**: Production-ready Linux service deployment
 - **Comprehensive Logging**: JSON-formatted logs with automatic rotation
-- **Batch Notifications**: Intelligent batching to prevent email flooding
-- **Cross-platform Support**: Works on Linux, Windows, and macOS
+- **CLI Interface**: Full command-line control with multiple options
 
-## Detected Threats
+### 🔧 Configuration & Monitoring
+- **YAML Configuration**: Easy-to-edit configuration files
+- **Real-time Monitoring**: Live log streaming and status monitoring
+- **Performance Optimization**: Resource limits and tuning options
+- **Security Hardening**: Built-in security features and best practices
 
-- **Port Scanning**: TCP/UDP port scans and connection attempts
-- **ICMP Scanning**: Ping sweeps and ICMP reconnaissance
-- **Brute Force Attacks**: Repeated authentication failures
-- **Malware Detection**: Signature-based payload analysis
-- **Data Exfiltration**: Unusual outbound data transfers
-- **Attacker Identification**: Behavioral analysis of suspicious IPs
+## 🎯 Detected Threats
 
-## Requirements
+| Threat Type | Description | Detection Method |
+|-------------|-------------|------------------|
+| **Port Scanning** | TCP/UDP port scans and connection attempts | Threshold-based port access monitoring |
+| **ICMP Scanning** | Ping sweeps and ICMP reconnaissance | ICMP packet pattern analysis |
+| **Brute Force Attacks** | Repeated authentication failures | Failed login attempt tracking |
+| **Malware Detection** | Signature-based payload analysis | Payload pattern matching |
+| **Data Exfiltration** | Unusual outbound data transfers | Data volume and pattern analysis |
+| **Attacker Identification** | Behavioral analysis of suspicious IPs | Multi-vector threat correlation |
+
+## 📋 Requirements
 
 ### System Requirements
 
-- **Operating System**: Linux (recommended), Windows 10+, or macOS 10.14+
-- **Python**: 3.8 or higher
-- **Privileges**: Administrator/root access for packet capture
-- **Network**: Access to network interface for monitoring
-- **Memory**: Minimum 512MB RAM (1GB+ recommended)
+| Component | Minimum | Recommended |
+|-----------|---------|-------------|
+| **OS** | Linux, Windows 10+, macOS 10.14+ | Linux (Ubuntu 20.04+) |
+| **Python** | 3.8+ | 3.9+ |
+| **RAM** | 512 MB | 2 GB+ |
+| **Storage** | 100 MB | 1 GB+ (SSD) |
+| **Privileges** | Root/Administrator | Root/Administrator |
 
 ### Python Dependencies
 
 ```bash
-scapy>=2.5.0,<3.0.0
-pyyaml>=6.0,<7.0.0
+scapy>=2.5.0,<3.0.0      # Packet capture and analysis
+pyyaml>=6.0,<7.0.0       # Configuration file parsing
+psutil>=5.8.0            # System monitoring
+colorama>=0.4.4          # Cross-platform colored output
 ```
 
-## Installation
+**Note**: All dependencies are automatically installed via `pip install -r requirements.txt`
 
-### 1. Clone or Download
+## 🔧 Installation
+
+### Quick Installation
 
 ```bash
-# Clone the repository (if using git)
+# 1. Download/Clone the project
 git clone <repository-url>
-cd intrusion-detection-system
+cd ids
 
-# Or download and extract the source code
-```
-
-### 2. Install Python Dependencies
-
-```bash
-# Install required packages
+# 2. Install dependencies
 pip install -r requirements.txt
 
-# Or install manually
-pip install scapy pyyaml
+# 3. Configure
+cp config.yaml.example config.yaml
+nano config.yaml  # Edit with your settings
+
+# 4. Run
+sudo python3 ids_main.py --config config.yaml
 ```
 
-### 3. Set Up Configuration
+### Detailed Installation
+
+For comprehensive setup instructions including virtual environments, systemd service deployment, and troubleshooting, see **[HOW_TO_RUN.md](HOW_TO_RUN.md)**.
+
+### Production Deployment
+
+For production Linux environments with systemd service:
 
 ```bash
-# Copy the example configuration file
+# Automated installation
+sudo ./install-service.sh
+
+# Manual service setup - see SYSTEMD_DEPLOYMENT.md
+sudo cp ids.service /etc/systemd/system/
+sudo systemctl enable ids
+sudo systemctl start ids
+```
+
+See **[SYSTEMD_DEPLOYMENT.md](SYSTEMD_DEPLOYMENT.md)** for complete deployment instructions.
+
+## ⚙️ Configuration
+
+### Quick Configuration
+
+```bash
+# 1. Copy example configuration
 cp config.yaml.example config.yaml
 
-# Edit the configuration file with your settings
-nano config.yaml  # or use your preferred editor
+# 2. Edit key settings
+nano config.yaml
 ```
 
-### 4. Configure Email Settings
-
-Edit `config.yaml` and update the email section:
+### Essential Settings
 
 ```yaml
-email:
-  smtp_host: smtp.gmail.com
+# Email notifications
+email_config:
+  smtp_server: "smtp.gmail.com"
   smtp_port: 587
-  use_tls: true
-  username: your-email@example.com
-  password: your-app-password
-  recipients:
-    - admin@example.com
+  username: "your-email@gmail.com"
+  password: "your-app-password"    # Use App Password for Gmail
+  recipient_emails:
+    - "admin@company.com"
+
+# Network monitoring
+detection_config:
+  network_interface: "eth0"        # Your network interface
+  port_scan_threshold: 10          # Sensitivity level
+  brute_force_threshold: 5
+  time_window: 300
+
+# Logging
+logging_config:
+  level: "INFO"                    # DEBUG, INFO, WARNING, ERROR
+  log_file: "ids.log"
 ```
 
-**Important**: For Gmail, use an App Password instead of your regular password. See [Gmail App Passwords](https://support.google.com/accounts/answer/185833) for setup instructions.
+### Find Your Network Interface
 
-## Configuration
-
-### Configuration File Format
-
-The `config.yaml` file contains all system settings:
-
-```yaml
-# Email notification settings
-email:
-  smtp_host: smtp.gmail.com          # SMTP server hostname
-  smtp_port: 587                     # SMTP server port
-  use_tls: true                      # Enable TLS encryption
-  username: your-email@example.com   # SMTP username
-  password: your-app-password        # SMTP password/app password
-  recipients:                        # List of alert recipients
-    - admin@example.com
-    - security@example.com
-
-# Threat detection settings
-detection:
-  network_interface: eth0            # Network interface to monitor
-  port_scan_threshold: 10            # Ports scanned before alert (60s window)
-  icmp_scan_threshold: 5             # Hosts pinged before alert (30s window)
-  brute_force_threshold: 5           # Failed attempts before alert (60s window)
-
-# Logging configuration
-logging:
-  log_level: INFO                    # DEBUG, INFO, WARNING, ERROR, CRITICAL
-  log_file: ids.log                  # Log file path
-  max_log_size_mb: 100              # Max log size before rotation
-  backup_count: 5                    # Number of backup logs to keep
-
-# Notification behavior
-notification:
-  batch_window_seconds: 300          # Time window for batching alerts
-  batch_threshold: 3                 # Min threats before batching
-  retry_attempts: 3                  # Email retry attempts
-  retry_delay_seconds: 10            # Delay between retries
-```
-
-### Network Interface Selection
-
-Find your network interface name:
-
-**Linux:**
 ```bash
-# List all interfaces
-ip link show
-# or
+# Linux
+ip addr show
+
+# Windows
+ipconfig
+
+# macOS
 ifconfig
-
-# Common names: eth0, wlan0, enp0s3
 ```
 
-**Windows:**
-```cmd
-# List interfaces
-ipconfig /all
+For complete configuration options and examples, see **[DOCUMENTATION.md](DOCUMENTATION.md)**.
 
-# Common names: Ethernet, Wi-Fi, Local Area Connection
-```
+## 🚀 Usage
 
-**macOS:**
-```bash
-# List interfaces
-ifconfig
-
-# Common names: en0, en1, en2
-```
-
-## Running the IDS
-
-### Basic Usage
+### Basic Commands
 
 ```bash
-# Run with default configuration
-sudo python3 ids_main.py
+# Standard operation
+sudo python3 ids_main.py --config config.yaml
 
-# Specify custom config file
-sudo python3 ids_main.py -c /path/to/config.yaml
+# Development/testing
+sudo python3 ids_main.py --config config.yaml --verbose --dry-run
 
-# Override network interface
-sudo python3 ids_main.py -i eth0
+# Specific interface
+sudo python3 ids_main.py --config config.yaml --interface eth0
 
-# Enable verbose logging
-sudo python3 ids_main.py -v
-
-# Dry-run mode (no emails sent)
-sudo python3 ids_main.py --dry-run
+# Background operation
+sudo nohup python3 ids_main.py --config config.yaml > ids.log 2>&1 &
 ```
 
 ### Command-Line Options
 
-```
-usage: ids [-h] [-c FILE] [-i INTERFACE] [-v] [--dry-run] [--no-banner] [--version]
+| Option | Description |
+|--------|-------------|
+| `-c, --config FILE` | Configuration file path |
+| `-i, --interface IFACE` | Network interface to monitor |
+| `-v, --verbose` | Enable verbose logging |
+| `--dry-run` | Test mode (no emails sent) |
+| `--no-banner` | Suppress startup banner |
+| `--help` | Show help message |
 
-Intrusion Detection System - Network threat monitoring and analysis
+### Service Deployment
 
-options:
-  -h, --help            show this help message and exit
-  -c FILE, --config FILE
-                        Path to configuration file (default: config.yaml)
-  -i INTERFACE, --interface INTERFACE
-                        Network interface to monitor (overrides config file)
-  -v, --verbose         Enable verbose logging output
-  --dry-run             Run in dry-run mode (no emails sent, logging only)
-  --no-banner           Suppress startup banner
-  --version             show program's version number and exit
-
-Examples:
-  ids -c config.yaml -i eth0
-  ids --config config.yaml --interface wlan0 --verbose
-  ids -c config.yaml -i eth0 --dry-run
-
-Note: This application requires root/administrator privileges for packet capture.
-```
-
-### Running as a Service
-
-#### Linux (systemd)
-
-Create a systemd service file:
+#### Linux (Systemd) - Recommended
 
 ```bash
-sudo nano /etc/systemd/system/ids.service
+# Quick setup
+sudo ./install-service.sh
+
+# Manual setup
+sudo systemctl enable ids
+sudo systemctl start ids
+sudo systemctl status ids
 ```
 
-```ini
-[Unit]
-Description=Intrusion Detection System
-After=network.target
-
-[Service]
-Type=simple
-User=root
-WorkingDirectory=/path/to/ids
-ExecStart=/usr/bin/python3 /path/to/ids/ids_main.py -c /path/to/ids/config.yaml
-Restart=always
-RestartSec=10
-
-[Install]
-WantedBy=multi-user.target
-```
-
-Enable and start the service:
+#### Monitoring Service
 
 ```bash
-sudo systemctl daemon-reload
-sudo systemctl enable ids.service
-sudo systemctl start ids.service
-sudo systemctl status ids.service
+# Check status
+sudo systemctl status ids
+
+# View logs
+sudo journalctl -u ids -f
+
+# Restart service
+sudo systemctl restart ids
 ```
 
-#### Windows
+For detailed usage instructions, see **[HOW_TO_RUN.md](HOW_TO_RUN.md)**.
 
-Use Task Scheduler or install as a Windows Service using tools like NSSM.
+## 🔐 Privilege Requirements
 
-## Privilege Requirements
+**Root/Administrator access is required** for packet capture operations.
 
-### Why Root/Administrator Access is Required
+### Why Elevated Privileges?
 
-The IDS requires elevated privileges to:
-- Capture network packets from network interfaces
-- Access low-level network operations
-- Monitor system network traffic
-- Bind to network interfaces for packet sniffing
+- Network packet capture from interfaces
+- Low-level network operations
+- System network traffic monitoring
+- Raw socket access
 
-### Linux/macOS
+### Platform-Specific
 
-```bash
-# Run with sudo
-sudo python3 ids_main.py
+| Platform | Command |
+|----------|---------|
+| **Linux/macOS** | `sudo python3 ids_main.py` |
+| **Windows** | Run Command Prompt as Administrator |
 
-# Or run as root user
-su -
-python3 ids_main.py
-```
+### Security Note
 
-### Windows
+The IDS runs with elevated privileges only for packet capture. All security best practices are implemented in the systemd service configuration.
 
-1. Right-click on Command Prompt or PowerShell
-2. Select "Run as administrator"
-3. Navigate to the IDS directory
-4. Run the script: `python ids_main.py`
+## 📧 Email Notifications
 
-## Email Notification Examples
+### Alert Features
 
-### Single Threat Alert
+- **Rich HTML Format**: Detailed threat information with formatting
+- **Severity Classification**: High, Medium, Low severity levels
+- **Actionable Recommendations**: Specific remediation steps
+- **Technical Details**: Complete packet and network information
+- **Batch Processing**: Multiple threats in single email to prevent flooding
+
+### Example Alert
 
 ```
 Subject: [IDS ALERT - HIGH] Port Scan Detected
@@ -282,53 +274,44 @@ Subject: [IDS ALERT - HIGH] Port Scan Detected
 === THREAT DETECTED ===
 Type: Port Scan
 Severity: High
+Source: 192.168.1.100 → 10.0.0.5
 Timestamp: 2025-10-15 14:30:25
-Source: 192.168.1.100
-Destination: 10.0.0.5
 
 === ANALYSIS ===
-Port scan detected from 192.168.1.100 targeting multiple ports on 10.0.0.5.
-15 ports were scanned within 60 seconds, exceeding the threshold of 10.
-
-=== SEVERITY JUSTIFICATION ===
-High severity assigned due to: Multiple ports scanned (15) exceeding threshold (10)
+15 ports scanned within 60 seconds (threshold: 10)
+Protocols: TCP
+Ports: 22, 80, 443, 3389, 5432...
 
 === RECOMMENDED ACTIONS ===
-1. Block source IP 192.168.1.100 at firewall level
-2. Review firewall rules for unnecessary open ports
-3. Monitor for additional scanning activity from this source
-4. Consider implementing port knocking for sensitive services
-
-=== TECHNICAL DETAILS ===
-Protocol: TCP
-Ports Scanned: 22, 23, 25, 53, 80, 110, 143, 443, 993, 995, 1433, 3306, 3389, 5432, 8080
-Detection Time: 2025-10-15 14:30:25
+1. Block source IP at firewall
+2. Review open ports
+3. Monitor for additional activity
 ```
 
-### Batched Alerts
+### Email Configuration
 
-```
-Subject: [IDS ALERT - BATCH] Multiple Threats Detected (5 threats)
-
-=== BATCH ALERT SUMMARY ===
-Time Window: 2025-10-15 14:25:00 - 14:30:00
-Total Threats: 5
-Highest Severity: High
-
-=== THREAT 1 ===
-Type: Port Scan | Severity: High | Source: 192.168.1.100
-...
-
-=== THREAT 2 ===
-Type: ICMP Scan | Severity: Medium | Source: 192.168.1.101
-...
+```yaml
+email_config:
+  smtp_server: "smtp.gmail.com"
+  smtp_port: 587
+  username: "alerts@company.com"
+  password: "app-password"
+  recipient_emails:
+    - "security@company.com"
+    - "admin@company.com"
 ```
 
-## Logging
+## 📊 Logging & Monitoring
 
-### Log Format
+### Log Features
 
-Logs are written in JSON format for easy parsing:
+- **JSON Format**: Structured logs for easy parsing and analysis
+- **Automatic Rotation**: Configurable size limits and backup retention
+- **Real-time Streaming**: Live log monitoring capabilities
+- **Severity Levels**: DEBUG, INFO, WARNING, ERROR, CRITICAL
+- **Systemd Integration**: Native journal logging for service deployment
+
+### Log Example
 
 ```json
 {
@@ -346,250 +329,188 @@ Logs are written in JSON format for easy parsing:
 }
 ```
 
-### Log Rotation
-
-Logs automatically rotate when they reach the configured size limit:
-- Default: 100MB per log file
-- Keeps 5 backup files by default
-- Configurable in `config.yaml`
-
-### Viewing Logs
+### Monitoring Commands
 
 ```bash
-# View current log
+# Real-time log monitoring
 tail -f ids.log
 
-# View JSON logs with formatting
-tail -f ids.log | python3 -m json.tool
+# Service logs (systemd)
+sudo journalctl -u ids -f
 
-# Search for specific threats
-grep "port_scan" ids.log | python3 -m json.tool
+# Search for threats
+grep "threat_detected" ids.log | jq '.'
+
+# Monitor specific threat types
+tail -f ids.log | grep "port_scan"
 ```
 
-## Troubleshooting
+## 🔧 Troubleshooting
 
-### Common Issues
+### Quick Fixes
 
-#### 1. Permission Denied Errors
-
-**Problem**: `PermissionError: [Errno 1] Operation not permitted`
-
-**Solution**:
-```bash
-# Linux/macOS: Run with sudo
-sudo python3 ids_main.py
-
-# Windows: Run as Administrator
-# Right-click Command Prompt → "Run as administrator"
-```
-
-#### 2. Network Interface Not Found
-
-**Problem**: `OSError: No such device exists`
-
-**Solution**:
-```bash
-# List available interfaces
-ip link show  # Linux
-ifconfig      # Linux/macOS
-ipconfig /all # Windows
-
-# Update config.yaml with correct interface name
-detection:
-  network_interface: eth0  # Use actual interface name
-```
-
-#### 3. Email Authentication Failed
-
-**Problem**: `SMTPAuthenticationError: Username and Password not accepted`
-
-**Solutions**:
-- **Gmail**: Use App Password instead of regular password
-- **Outlook**: Enable "Less secure app access" or use App Password
-- **Corporate Email**: Check with IT for SMTP settings
-- **Two-Factor Auth**: Generate application-specific password
-
-#### 4. No Packets Captured
-
-**Problem**: IDS starts but no threats detected
-
-**Troubleshooting**:
-```bash
-# Test packet capture manually
-sudo python3 -c "
-from scapy.all import sniff
-print('Testing packet capture...')
-packets = sniff(iface='eth0', count=5, timeout=10)
-print(f'Captured {len(packets)} packets')
-"
-
-# Check interface is active
-ping google.com  # Generate some traffic
-
-# Verify interface name in config
-```
-
-#### 5. High CPU Usage
-
-**Problem**: IDS consuming too much CPU
-
-**Solutions**:
-- Increase detection thresholds in config
-- Use more specific network filters
-- Monitor on less busy network interface
-- Reduce log level from DEBUG to INFO
-
-#### 6. Email Flooding
-
-**Problem**: Too many email notifications
-
-**Solutions**:
-```yaml
-# Adjust batching settings in config.yaml
-notification:
-  batch_window_seconds: 600    # Increase batching window
-  batch_threshold: 2           # Lower threshold for batching
-  
-# Or increase detection thresholds
-detection:
-  port_scan_threshold: 20      # Require more activity
-  icmp_scan_threshold: 10
-```
+| Issue | Solution |
+|-------|----------|
+| **Permission Denied** | Run with `sudo` (Linux/macOS) or as Administrator (Windows) |
+| **Interface Not Found** | Check interface name with `ip addr show` or `ipconfig` |
+| **Email Auth Failed** | Use App Password for Gmail, check SMTP settings |
+| **No Threats Detected** | Verify interface is active, test with `--verbose` |
+| **High CPU Usage** | Increase detection thresholds, reduce log level |
 
 ### Debug Mode
 
-Enable verbose logging for troubleshooting:
-
 ```bash
-# Run with verbose output
-sudo python3 ids_main.py -v
+# Enable verbose logging
+sudo python3 ids_main.py --config config.yaml --verbose
 
-# Or set in config.yaml
-logging:
-  log_level: DEBUG
+# Test configuration without emails
+sudo python3 ids_main.py --config config.yaml --dry-run
+
+# Check specific interface
+sudo python3 ids_main.py --config config.yaml --interface eth0 --verbose
 ```
 
-### Testing Configuration
-
-Test your setup without sending emails:
+### Common Commands
 
 ```bash
-# Dry-run mode
-sudo python3 ids_main.py --dry-run
+# Test packet capture
+sudo python3 -c "from scapy.all import sniff; print('Testing...'); sniff(count=5)"
 
-# This will:
-# - Load configuration
-# - Start packet capture
-# - Detect threats
-# - Log everything
-# - Skip email sending
+# Check interface status
+ip addr show  # Linux
+ipconfig      # Windows
+
+# Monitor logs
+tail -f ids.log | grep -i "error\|threat"
+
+# Service status (systemd)
+sudo systemctl status ids
+sudo journalctl -u ids -n 50
 ```
 
-### Log Analysis
+For comprehensive troubleshooting, see **[HOW_TO_RUN.md](HOW_TO_RUN.md)** and **[DOCUMENTATION.md](DOCUMENTATION.md)**.
 
-Analyze logs for patterns:
-
-```bash
-# Count threats by type
-grep "threat_detected" ids.log | jq -r '.threat_type' | sort | uniq -c
-
-# Find high severity threats
-grep "high\|critical" ids.log | jq '.'
-
-# Monitor real-time threats
-tail -f ids.log | grep "threat_detected" | jq '.'
-```
-
-## Performance Considerations
+## 📈 Performance & Security
 
 ### System Resources
 
-- **CPU**: Packet analysis is CPU-intensive
-- **Memory**: Keeps detection state in memory
-- **Disk**: Log files can grow large
-- **Network**: Minimal impact on network performance
+| Resource | Usage | Optimization |
+|----------|-------|--------------|
+| **CPU** | Moderate (packet analysis) | Tune detection thresholds |
+| **Memory** | Low (detection state) | Monitor with `top` |
+| **Disk** | Variable (log files) | Configure log rotation |
+| **Network** | Minimal impact | Use dedicated monitoring interface |
 
-### Optimization Tips
+### Security Best Practices
 
-1. **Interface Selection**: Monitor specific interfaces only
-2. **Threshold Tuning**: Adjust thresholds to reduce false positives
-3. **Log Management**: Regular log rotation and cleanup
-4. **Batch Notifications**: Use batching to reduce email load
+- **Configuration Security**: Protect config files (`chmod 600 config.yaml`)
+- **Email Security**: Use dedicated accounts with App Passwords
+- **Network Security**: Deploy on trusted systems with proper segmentation
+- **Operational Security**: Regular backups, health monitoring, threshold tuning
 
-### Monitoring Performance
+### Performance Monitoring
 
 ```bash
-# Monitor CPU and memory usage
+# Resource usage
 top -p $(pgrep -f ids_main.py)
 
-# Check log file sizes
-ls -lh *.log
+# Log file sizes
+du -sh *.log
 
-# Monitor packet capture rate
-# (Check verbose logs for packet processing statistics)
+# Service performance (systemd)
+sudo systemctl status ids
 ```
 
-## Security Considerations
+## 📚 Documentation & Support
 
-### Configuration Security
+### Complete Documentation
 
-- Store email passwords securely (consider environment variables)
-- Restrict access to configuration files: `chmod 600 config.yaml`
-- Use dedicated email account for IDS notifications
-- Enable two-factor authentication on email accounts
-
-### Network Security
-
-- Run IDS on dedicated monitoring interface when possible
-- Consider network segmentation for IDS deployment
-- Regular updates of malware signatures
-- Monitor IDS logs for tampering attempts
-
-### Operational Security
-
-- Regular backup of configuration and logs
-- Monitor IDS availability and health
-- Test email notifications periodically
-- Review and tune detection thresholds regularly
-
-## Support and Contributing
+| Document | Purpose |
+|----------|---------|
+| **[HOW_TO_RUN.md](HOW_TO_RUN.md)** | Step-by-step setup and usage guide |
+| **[DOCUMENTATION.md](DOCUMENTATION.md)** | Complete technical documentation |
+| **[SYSTEMD_DEPLOYMENT.md](SYSTEMD_DEPLOYMENT.md)** | Linux service deployment |
 
 ### Getting Help
 
-1. Check this README for common issues
-2. Review log files for error messages
-3. Test with `--dry-run` mode first
-4. Verify configuration file syntax
+1. **Check Documentation**: Review the guides above for detailed instructions
+2. **Enable Debug Mode**: Use `--verbose` flag for detailed logging
+3. **Test Configuration**: Use `--dry-run` mode to test without sending emails
+4. **Check Logs**: Review `ids.log` or `journalctl -u ids` for errors
 
-### Reporting Issues
+### Project Structure
 
-When reporting issues, include:
-- Operating system and version
-- Python version
-- Complete error messages
-- Configuration file (remove sensitive data)
-- Steps to reproduce the issue
-
-### Development
-
-For development and testing:
-
-```bash
-# Install development dependencies
-pip install pytest
-
-# Run tests
-python -m pytest
-
-# Run specific detector tests
-python test_port_scan_detector.py
-python test_threat_detection_engine.py
+```
+ids/
+├── ids/                    # Main IDS package
+│   ├── detectors/         # Threat detection modules
+│   ├── services/          # Core services
+│   ├── utils/             # Utilities and helpers
+│   └── models/            # Data models
+├── config.yaml.example    # Configuration template
+├── ids_main.py            # Main entry point
+├── ids.service            # Systemd service file
+├── install-service.sh     # Automated installer
+└── requirements.txt       # Python dependencies
 ```
 
-## License
+### File Overview
 
-This project is provided as-is for educational and security monitoring purposes. Use responsibly and in compliance with local laws and regulations.
+| File | Purpose |
+|------|---------|
+| `ids_main.py` | Main application entry point |
+| `config.yaml.example` | Configuration template |
+| `ids.service` | Systemd service configuration |
+| `install-service.sh` | Automated Linux installation |
+| `requirements.txt` | Python package dependencies |
+
+## ⚖️ License & Legal
+
+This project is provided for **educational and security monitoring purposes**. 
+
+### Important Legal Notes
+
+- ⚠️ **Authorization Required**: Ensure proper authorization before monitoring network traffic
+- 🏢 **Corporate Environments**: Check with IT/Legal before deployment
+- 🌍 **Compliance**: Use in accordance with local laws and regulations
+- 🔒 **Privacy**: Respect privacy laws and data protection regulations
+
+### Disclaimer
+
+This software is provided "as-is" without warranty. Users are responsible for ensuring compliance with applicable laws and regulations.
 
 ---
 
-**⚠️ Important**: This IDS is designed for network monitoring and security analysis. Ensure you have proper authorization before monitoring network traffic, especially in corporate or shared environments.
+## 🚀 Quick Reference
+
+### Essential Commands
+
+```bash
+# Install and configure
+pip install -r requirements.txt
+cp config.yaml.example config.yaml
+
+# Run (development)
+sudo python3 ids_main.py --config config.yaml --verbose
+
+# Deploy (production)
+sudo ./install-service.sh
+sudo systemctl start ids
+
+# Monitor
+sudo journalctl -u ids -f
+tail -f ids.log
+```
+
+### Key Features Summary
+
+✅ **Real-time threat detection** - Port scans, brute force, malware, data exfiltration  
+✅ **Email notifications** - Rich HTML alerts with remediation steps  
+✅ **Production deployment** - Systemd service with auto-restart  
+✅ **Cross-platform** - Linux, Windows, macOS support  
+✅ **Configurable** - YAML configuration with flexible thresholds  
+✅ **Comprehensive logging** - JSON logs with rotation  
+
+---
+
+*For detailed setup instructions, see [HOW_TO_RUN.md](HOW_TO_RUN.md)*
