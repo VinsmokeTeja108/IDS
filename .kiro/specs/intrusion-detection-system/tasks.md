@@ -252,7 +252,22 @@
     - Wire together all components: `PacketCaptureEngine`, `ThreatDetectionEngine`, `ThreatAnalyzer`, `NotificationService`
     - _Requirements: 1.1, 2.1, 3.1, 4.1, 5.1, 6.1, 7.1_
   
-  - [-] 8.2 Create command-line interface
+  - [x] 8.2 Create command-line interface
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -264,14 +279,22 @@
     - Implement startup banner with system information
     - _Requirements: 5.1, 7.1_
   
-  - [ ] 8.3 Create entry point script
+  - [x] 8.3 Create entry point script
+
+
+
+
+
     - Create `main.py` or `ids.py` as entry point
     - Add privilege check (require root/admin for packet capture)
     - Add signal handlers for graceful shutdown (SIGINT, SIGTERM)
     - _Requirements: 7.1_
 
 - [ ] 9. Create installation and deployment files
-  - [ ] 9.1 Create `requirements.txt` with dependencies
+  - [-] 9.1 Create `requirements.txt` with dependencies
+
+
+
     - List all Python dependencies: scapy, pyyaml
     - Specify version constraints
     - _Requirements: 5.1_
