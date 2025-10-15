@@ -24,13 +24,23 @@
     - Implement fallback to secure defaults when configuration is invalid
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5_
   
-  - [ ] 2.2 Create sample configuration file template
+  - [x] 2.2 Create sample configuration file template
+
+
+
+
+
     - Write `config.yaml.example` with all configuration sections (email, detection, logging, notification)
     - Include comments explaining each configuration option
     - _Requirements: 5.1, 5.2, 5.3, 5.4_
 
 - [ ] 3. Implement logging system
-  - [ ] 3.1 Create `IDSLogger` class with JSON formatting
+  - [x] 3.1 Create `IDSLogger` class with JSON formatting
+
+
+
+
+
     - Implement `log_threat()` method for logging threat events
     - Implement `log_notification()` method for logging email notifications
     - Implement `log_system_event()` method for system events
