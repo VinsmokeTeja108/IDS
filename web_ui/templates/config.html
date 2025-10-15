@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+
+{% block title %}Configuration - IDS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">System Configuration</h2>
+    </div>
+</div>
+
+<!-- Configuration Tabs -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <ul class="nav nav-tabs card-header-tabs" id="configTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="email-tab" data-bs-toggle="tab" data-bs-target="#email-panel" type="button">
+                            <i class="bi bi-envelope"></i> Email Settings
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="detection-tab" data-bs-toggle="tab" data-bs-target="#detection-panel" type="button">
+                            <i class="bi bi-shield"></i> Detection
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="logging-tab" data-bs-toggle="tab" data-bs-target="#logging-panel" type="button">
+                            <i class="bi bi-file-text"></i> Logging
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="notifications-tab" data-bs-toggle="tab" data-bs-target="#notifications-panel" type="button">
+                            <i class="bi bi-bell"></i> Notifications
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="detectors-tab" data-bs-toggle="tab" data-bs-target="#detectors-panel" type="button">
+                            <i class="bi bi-toggles"></i> Detectors
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="card-body">
+                <div class="tab-content" id="configTabContent">
+                    
+                    <!-- Email Settings Tab -->
+                    <div class="tab-pane fade show active" id="email-panel" role="tabpanel">
+                        <h5 class="mb-3">Email Notification Settings</h5>
+                        <form id="email-form">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="smtp-host" class="form-label">SMTP Host</label>
+                                    <input type="text" class="form-control" id="smtp-host" placeholder="smtp.gmail.com">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="smtp-port" class="form-label">SMTP Port</label>
+                                    <input type="number" class="form-control" id="smtp-port" placeholder="587">
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="smtp-username" class="form-label">Username</label>
+                                    <input type="text" class="form-control" id="smtp-username" placeholder="[email]">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="smtp-password" class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="smtp-password" placeholder="••••••••">
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="smtp-use-tls">
+                                    <label class="form-check-label" for="smtp-use-tls">
+                                        Use TLS/STARTTLS
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="email-recipients" class="form-label">Recipients</label>
+                                <div id="recipients-list" class="mb-2"></div>
+                                <div class="input-group">
+                                    <input type="email" class="form-control" id="new-recipient" placeholder="[email]">
+                                    <button class="btn btn-outline-secondary" type="button" id="add-recipient-btn">
+                                        <i class="bi bi-plus"></i> Add
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-primary" id="test-email-btn">
+                                    <i class="bi bi-send"></i> Send Test Email
+                                </button>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="bi bi-save"></i> Save Changes
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Detection Settings Tab -->
+                    <div class="tab-pane fade" id="detection-panel" role="tabpanel">
+                        <h5 class="mb-3">Detection Thresholds</h5>
+                        <form id="detection-form">
+                            <div class="mb-3">
+                                <label for="network-interface" class="form-label">Network Interface</label>
+                                <input type="text" class="form-control" id="network-interface" placeholder="eth0">
+                                <small class="form-text text-muted">Network interface to monitor</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="port-scan-threshold" class="form-label">Port Scan Threshold</label>
+                                <input type="number" class="form-control" id="port-scan-threshold" placeholder="10">
+                                <small class="form-text text-muted">Number of ports before triggering alert</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="icmp-scan-threshold" class="form-label">ICMP Scan Threshold</label>
+                                <input type="number" class="form-control" id="icmp-scan-threshold" placeholder="20">
+                                <small class="form-text text-muted">Number of ICMP packets before triggering alert</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="brute-force-threshold" class="form-label">Brute Force Threshold</label>
+                                <input type="number" class="form-control" id="brute-force-threshold" placeholder="5">
+                                <small class="form-text text-muted">Failed login attempts before triggering alert</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="data-exfil-threshold" class="form-label">Data Exfiltration Threshold (MB)</label>
+                                <input type="number" class="form-control" id="data-exfil-threshold" placeholder="100">
+                                <small class="form-text text-muted">Data transfer size before triggering alert</small>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-save"></i> Save Changes
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <!-- Logging Settings Tab -->
+                    <div class="tab-pane fade" id="logging-panel" role="tabpanel">
+                        <h5 class="mb-3">Logging Configuration</h5>
+                        <form id="logging-form">
+                            <div class="mb-3">
+                                <label for="log-level" class="form-label">Log Level</label>
+                                <select class="form-select" id="log-level">
+                                    <option value="DEBUG">DEBUG</option>
+                                    <option value="INFO">INFO</option>
+                                    <option value="WARNING">WARNING</option>
+                                    <option value="ERROR">ERROR</option>
+                                    <option value="CRITICAL">CRITICAL</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="log-file-path" class="form-label">Log File Path</label>
+                                <input type="text" class="form-control" id="log-file-path" placeholder="ids.log">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="max-log-size" class="form-label">Max Log File Size (MB)</label>
+                                <input type="number" class="form-control" id="max-log-size" placeholder="10">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="log-backup-count" class="form-label">Log Backup Count</label>
+                                <input type="number" class="form-control" id="log-backup-count" placeholder="5">
+                                <small class="form-text text-muted">Number of backup log files to keep</small>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-save"></i> Save Changes
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <!-- Notifications Settings Tab -->
+                    <div class="tab-pane fade" id="notifications-panel" role="tabpanel">
+                        <h5 class="mb-3">Notification Batching</h5>
+                        <form id="notifications-form">
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="enable-batching">
+                                    <label class="form-check-label" for="enable-batching">
+                                        Enable Notification Batching
+                                    </label>
+                                </div>
+                                <small class="form-text text-muted">Group multiple threats into single email</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="batch-window" class="form-label">Batch Window (minutes)</label>
+                                <input type="number" class="form-control" id="batch-window" placeholder="5">
+                                <small class="form-text text-muted">Time window for grouping threats</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="batch-threshold" class="form-label">Batch Threshold</label>
+                                <input type="number" class="form-control" id="batch-threshold" placeholder="3">
+                                <small class="form-text text-muted">Minimum threats before batching</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="min-severity" class="form-label">Minimum Severity for Notifications</label>
+                                <select class="form-select" id="min-severity">
+                                    <option value="low">Low</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="high">High</option>
+                                    <option value="critical">Critical</option>
+                                </select>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-save"></i> Save Changes
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <!-- Detectors Management Tab -->
+                    <div class="tab-pane fade" id="detectors-panel" role="tabpanel">
+                        <h5 class="mb-3">Threat Detectors</h5>
+                        
+                        <div class="alert alert-warning" id="all-detectors-disabled-warning" style="display: none;">
+                            <i class="bi bi-exclamation-triangle"></i> Warning: All detectors are disabled. The system will not detect any threats.
+                        </div>
+                        
+                        <div id="detectors-list">
+                            <div class="text-center text-muted py-4">
+                                <div class="spinner-border" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-2">Loading detectors...</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/config.js') }}"></script>
+{% endblock %}

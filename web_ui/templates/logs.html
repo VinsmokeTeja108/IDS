@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Logs - IDS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">System Logs</h2>
+    </div>
+</div>
+
+<!-- Filters and Search -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label for="log-event-type" class="form-label">Event Type</label>
+                        <select id="log-event-type" class="form-select">
+                            <option value="">All Events</option>
+                            <option value="threat">Threat Detected</option>
+                            <option value="notification">Notification Sent</option>
+                            <option value="system">System Event</option>
+                            <option value="error">Error</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="log-search" class="form-label">Search</label>
+                        <input type="text" id="log-search" class="form-control" placeholder="Search by keyword or IP address...">
+                    </div>
+                    
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button id="search-logs-btn" class="btn btn-primary w-100">
+                            <i class="bi bi-search"></i> Search
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="auto-refresh-logs">
+                            <label class="form-check-label" for="auto-refresh-logs">
+                                Auto-refresh (every 10 seconds)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Logs Table -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-file-text"></i> Log Entries</h5>
+                <button id="refresh-logs-btn" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-arrow-clockwise"></i> Refresh
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 180px;">Timestamp</th>
+                                <th style="width: 120px;">Event Type</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logs-table-body">
+                            <tr>
+                                <td colspan="3" class="text-center text-muted">
+                                    <div class="py-4">
+                                        <i class="bi bi-file-text" style="font-size: 3rem;"></i>
+                                        <p class="mt-2">No logs available</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Loading Indicator -->
+                <div id="logs-loading" class="text-center py-4" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+                
+                <!-- Pagination -->
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div>
+                        <span class="text-muted">
+                            Showing <span id="logs-showing-start">0</span> to <span id="logs-showing-end">0</span> of <span id="logs-total">0</span> entries
+                        </span>
+                    </div>
+                    <nav>
+                        <ul class="pagination mb-0">
+                            <li class="page-item" id="prev-page-item">
+                                <a class="page-link" href="#" id="prev-page-btn">
+                                    <i class="bi bi-chevron-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="page-item disabled">
+                                <span class="page-link">
+                                    Page <span id="current-page">1</span> of <span id="total-pages">1</span>
+                                </span>
+                            </li>
+                            <li class="page-item" id="next-page-item">
+                                <a class="page-link" href="#" id="next-page-btn">
+                                    Next <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/logs.js') }}"></script>
+{% endblock %}

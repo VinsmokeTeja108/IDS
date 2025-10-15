@@ -1,0 +1,1487 @@
+/* IDS Web UI Custom Styles */
+
+/* Body and Layout */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+/* Severity Color Coding */
+.severity-critical {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.severity-high {
+    color: #fd7e14;
+    font-weight: bold;
+}
+
+.severity-medium {
+    color: #ffc107;
+    font-weight: bold;
+}
+
+.severity-low {
+    color: #0dcaf0;
+    font-weight: bold;
+}
+
+/* Severity Badges */
+.badge.severity-critical {
+    background-color: #dc3545;
+    color: #fff;
+    transition: all 0.2s ease-in-out;
+}
+
+.badge.severity-critical:hover {
+    background-color: #bb2d3b;
+    transform: scale(1.05);
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+}
+
+.badge.severity-high {
+    background-color: #fd7e14;
+    color: #fff;
+    transition: all 0.2s ease-in-out;
+}
+
+.badge.severity-high:hover {
+    background-color: #dc6502;
+    transform: scale(1.05);
+    box-shadow: 0 2px 4px rgba(253, 126, 20, 0.3);
+}
+
+.badge.severity-medium {
+    background-color: #ffc107;
+    color: #000;
+    transition: all 0.2s ease-in-out;
+}
+
+.badge.severity-medium:hover {
+    background-color: #ffca2c;
+    transform: scale(1.05);
+    box-shadow: 0 2px 4px rgba(255, 193, 7, 0.3);
+}
+
+.badge.severity-low {
+    background-color: #0dcaf0;
+    color: #000;
+    transition: all 0.2s ease-in-out;
+}
+
+.badge.severity-low:hover {
+    background-color: #31d2f2;
+    transform: scale(1.05);
+    box-shadow: 0 2px 4px rgba(13, 202, 240, 0.3);
+}
+
+/* Severity Background Classes for Cards and Alerts */
+.bg-severity-critical {
+    background-color: rgba(220, 53, 69, 0.1);
+    border-color: #dc3545;
+}
+
+.bg-severity-high {
+    background-color: rgba(253, 126, 20, 0.1);
+    border-color: #fd7e14;
+}
+
+.bg-severity-medium {
+    background-color: rgba(255, 193, 7, 0.1);
+    border-color: #ffc107;
+}
+
+.bg-severity-low {
+    background-color: rgba(13, 202, 240, 0.1);
+    border-color: #0dcaf0;
+}
+
+/* Severity Border Classes */
+.border-severity-critical {
+    border-color: #dc3545 !important;
+}
+
+.border-severity-high {
+    border-color: #fd7e14 !important;
+}
+
+.border-severity-medium {
+    border-color: #ffc107 !important;
+}
+
+.border-severity-low {
+    border-color: #0dcaf0 !important;
+}
+
+/* Connection Status */
+#connection-status {
+    font-size: 0.875rem;
+    transition: all 0.3s ease-in-out;
+    cursor: help;
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.25rem;
+}
+
+#connection-status.connected {
+    background-color: #198754 !important;
+    animation: none;
+}
+
+#connection-status.disconnected {
+    background-color: #ffc107 !important;
+    color: #000 !important;
+}
+
+#connection-status.connecting {
+    background-color: #6c757d !important;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+#connection-status.error {
+    background-color: #dc3545 !important;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+#connection-status i {
+    margin-right: 0.25rem;
+    font-size: 0.75rem;
+}
+
+#connection-status.connecting i {
+    animation: spin 1s linear infinite;
+}
+
+/* Connection Status Pulse Animation */
+@keyframes connectionPulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}
+
+/* Status Cards */
+.status-item {
+    padding: 0.5rem 0;
+}
+
+.status-item label {
+    display: block;
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-item .h5 {
+    font-weight: 600;
+    color: #212529;
+}
+
+/* Dashboard Cards */
+.card {
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: all 0.3s ease-in-out;
+    margin-bottom: 1.5rem;
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+    padding: 1rem 1.25rem;
+}
+
+.card-body {
+    padding: 1.5rem 1.25rem;
+}
+
+/* Quick Stats Cards */
+.card.text-white .card-body {
+    padding: 1.5rem;
+}
+
+.card.text-white h2 {
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-top: 0.5rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.card.text-white h6 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.9;
+}
+
+.card.text-white {
+    border: none;
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease-in-out;
+}
+
+.card.text-white:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.25);
+}
+
+/* Stat Card Icon Animation */
+.card.text-white i {
+    transition: all 0.3s ease-in-out;
+}
+
+.card.text-white:hover i {
+    transform: scale(1.1) rotate(5deg);
+    opacity: 0.7 !important;
+}
+
+/* System Status Card Enhancements */
+.card .card-header h5 {
+    font-size: 1.1rem;
+    color: #495057;
+}
+
+.card .card-header i {
+    margin-right: 0.5rem;
+    color: #6c757d;
+}
+
+/* Threat Cards */
+.threat-card {
+    border-left: 4px solid #6c757d;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease-in-out;
+    cursor: pointer;
+}
+
+.threat-card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.threat-card.critical {
+    border-left-color: #dc3545;
+}
+
+.threat-card.critical:hover {
+    box-shadow: 0 0.5rem 1rem rgba(220, 53, 69, 0.25);
+    background-color: rgba(220, 53, 69, 0.02);
+}
+
+.threat-card.high {
+    border-left-color: #fd7e14;
+}
+
+.threat-card.high:hover {
+    box-shadow: 0 0.5rem 1rem rgba(253, 126, 20, 0.25);
+    background-color: rgba(253, 126, 20, 0.02);
+}
+
+.threat-card.medium {
+    border-left-color: #ffc107;
+}
+
+.threat-card.medium:hover {
+    box-shadow: 0 0.5rem 1rem rgba(255, 193, 7, 0.25);
+    background-color: rgba(255, 193, 7, 0.02);
+}
+
+.threat-card.low {
+    border-left-color: #0dcaf0;
+}
+
+.threat-card.low:hover {
+    box-shadow: 0 0.5rem 1rem rgba(13, 202, 240, 0.25);
+    background-color: rgba(13, 202, 240, 0.02);
+}
+
+/* Recent Threats List */
+.recent-threat-item {
+    padding: 1rem;
+    border-bottom: 1px solid #dee2e6;
+    transition: all 0.3s ease-in-out;
+    cursor: pointer;
+    border-left: 4px solid transparent;
+    background-color: #fff;
+}
+
+.recent-threat-item:last-child {
+    border-bottom: none;
+}
+
+.recent-threat-item:hover {
+    background-color: #f8f9fa;
+    border-left-color: #6c757d;
+    padding-left: 1.25rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.recent-threat-item.critical {
+    border-left-color: rgba(220, 53, 69, 0.3);
+}
+
+.recent-threat-item.critical:hover {
+    border-left-color: #dc3545;
+    background-color: rgba(220, 53, 69, 0.05);
+}
+
+.recent-threat-item.high {
+    border-left-color: rgba(253, 126, 20, 0.3);
+}
+
+.recent-threat-item.high:hover {
+    border-left-color: #fd7e14;
+    background-color: rgba(253, 126, 20, 0.05);
+}
+
+.recent-threat-item.medium {
+    border-left-color: rgba(255, 193, 7, 0.3);
+}
+
+.recent-threat-item.medium:hover {
+    border-left-color: #ffc107;
+    background-color: rgba(255, 193, 7, 0.05);
+}
+
+.recent-threat-item.low {
+    border-left-color: rgba(13, 202, 240, 0.3);
+}
+
+.recent-threat-item.low:hover {
+    border-left-color: #0dcaf0;
+    background-color: rgba(13, 202, 240, 0.05);
+}
+
+/* Recent Threat Item Content */
+.recent-threat-item .threat-type {
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.recent-threat-item .threat-details {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.recent-threat-item .threat-time {
+    font-size: 0.75rem;
+    color: #adb5bd;
+    font-style: italic;
+}
+
+/* Empty State Styling */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 4rem;
+    opacity: 0.3;
+    margin-bottom: 1rem;
+}
+
+.empty-state p {
+    font-size: 1.1rem;
+    margin-top: 1rem;
+    font-weight: 500;
+}
+
+/* Detector Toggle */
+.detector-item {
+    padding: 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    margin-bottom: 0.75rem;
+    transition: all 0.3s ease-in-out;
+}
+
+.detector-item:hover {
+    background-color: #f8f9fa;
+    border-color: #adb5bd;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.detector-item.disabled {
+    opacity: 0.6;
+}
+
+.detector-item.disabled:hover {
+    background-color: transparent;
+    border-color: #dee2e6;
+    box-shadow: none;
+}
+
+/* Interactive Button Hover Effects */
+.btn-view-details {
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-view-details:hover {
+    transform: translateX(3px);
+}
+
+/* Severity Filter Buttons */
+.severity-filter-btn {
+    transition: all 0.2s ease-in-out;
+    border: 2px solid transparent;
+}
+
+.severity-filter-btn.active {
+    font-weight: bold;
+    border-color: currentColor;
+}
+
+.severity-filter-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Loading States */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    border-radius: 0.5rem;
+    backdrop-filter: blur(2px);
+}
+
+.loading-overlay .text-center {
+    padding: 2rem;
+}
+
+/* Loading Spinner */
+.spinner-border-custom {
+    width: 3rem;
+    height: 3rem;
+    border-width: 0.3rem;
+}
+
+/* Card Loading State */
+.card.loading {
+    position: relative;
+    pointer-events: none;
+}
+
+.card.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.5rem;
+    z-index: 10;
+}
+
+/* Skeleton Loading Animation */
+@keyframes skeleton-loading {
+    0% {
+        background-position: -200px 0;
+    }
+    100% {
+        background-position: calc(200px + 100%) 0;
+    }
+}
+
+.skeleton {
+    background: linear-gradient(90deg, #f0f0f0 0px, #f8f8f8 40px, #f0f0f0 80px);
+    background-size: 200px 100%;
+    animation: skeleton-loading 1.5s infinite;
+    border-radius: 0.25rem;
+}
+
+.skeleton-text {
+    height: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.skeleton-title {
+    height: 1.5rem;
+    width: 60%;
+    margin-bottom: 1rem;
+}
+
+.skeleton-stat {
+    height: 3rem;
+    width: 80%;
+}
+
+/* Pulse Loading Animation */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.loading-pulse {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Spinner Animation */
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.spinner {
+    display: inline-block;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    border-top-color: #0d6efd;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.spinner-sm {
+    width: 1rem;
+    height: 1rem;
+    border-width: 2px;
+}
+
+.spinner-lg {
+    width: 3rem;
+    height: 3rem;
+    border-width: 4px;
+}
+
+.spinner-border-lg {
+    width: 4rem;
+    height: 4rem;
+    border-width: 0.4rem;
+}
+
+/* Button Loading State */
+.btn.loading {
+    position: relative;
+    color: transparent !important;
+    pointer-events: none;
+}
+
+.btn.loading::after {
+    content: '';
+    position: absolute;
+    width: 1rem;
+    height: 1rem;
+    top: 50%;
+    left: 50%;
+    margin-left: -0.5rem;
+    margin-top: -0.5rem;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+/* Fade In Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+/* Slide Up Animation */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.slide-up {
+    animation: slideUp 0.4s ease-out;
+}
+
+/* Scale In Animation */
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.scale-in {
+    animation: scaleIn 0.3s ease-out;
+}
+
+/* Toast Notifications */
+.toast-container {
+    z-index: 9999;
+}
+
+.toast {
+    min-width: 300px;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    border: none;
+}
+
+.toast.show {
+    opacity: 1;
+}
+
+.toast .toast-header {
+    border-bottom: none;
+    font-weight: 600;
+    padding: 0.75rem 1rem;
+}
+
+.toast .toast-body {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+}
+
+.toast .btn-close {
+    filter: brightness(0) invert(1);
+}
+
+.toast .toast-header.bg-warning .btn-close,
+.toast .toast-header.text-dark .btn-close {
+    filter: none;
+}
+
+/* Toast Animation */
+@keyframes toastSlideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.toast.showing {
+    animation: toastSlideIn 0.3s ease-out;
+}
+
+/* Connection Error Banner */
+#connection-error-banner {
+    margin-bottom: 1.5rem;
+    border: 2px solid #dc3545;
+    box-shadow: 0 0.25rem 0.5rem rgba(220, 53, 69, 0.2);
+}
+
+#connection-error-banner.show {
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#connection-error-banner .alert-heading {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+#connection-error-banner .btn-outline-danger {
+    border-width: 2px;
+    font-weight: 600;
+}
+
+#connection-error-banner .btn-outline-danger:hover {
+    background-color: #fff;
+    color: #dc3545;
+}
+
+/* Recipient Tags */
+.recipient-tag {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    margin: 0.25rem;
+    background-color: #e9ecef;
+    border-radius: 0.25rem;
+}
+
+.recipient-tag .remove-recipient {
+    margin-left: 0.5rem;
+    cursor: pointer;
+    color: #dc3545;
+}
+
+.recipient-tag .remove-recipient:hover {
+    color: #bb2d3b;
+}
+
+/* Log Entry Styling */
+.log-entry-threat {
+    color: #dc3545;
+}
+
+.log-entry-notification {
+    color: #0d6efd;
+}
+
+.log-entry-system {
+    color: #198754;
+}
+
+.log-entry-error {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+/* Chart Containers */
+.chart-container {
+    position: relative;
+    height: 300px;
+}
+
+/* Responsive Layout Styles */
+
+/* Large Tablets and Small Desktops (768px - 991px) */
+@media (max-width: 991px) {
+    /* Adjust card spacing */
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    /* Stack columns on smaller screens */
+    .col-md-6, .col-md-4, .col-md-3 {
+        margin-bottom: 1rem;
+    }
+    
+    /* Adjust chart container height */
+    .chart-container {
+        height: 250px;
+    }
+    
+    /* Make tables scrollable */
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* Tablets (768px - 991px) */
+@media (min-width: 768px) and (max-width: 991px) {
+    /* Optimize navigation for tablets */
+    .navbar-nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+    
+    .nav-link {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+    }
+    
+    /* Adjust button sizes */
+    .btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    /* Optimize form layouts */
+    .form-label {
+        font-size: 0.9rem;
+    }
+    
+    .form-control, .form-select {
+        font-size: 0.9rem;
+    }
+    
+    /* Adjust modal sizes */
+    .modal-dialog {
+        max-width: 90%;
+    }
+}
+
+/* Small Tablets and Large Phones (576px - 767px) */
+@media (max-width: 767px) {
+    /* Reduce navbar brand size */
+    .navbar-brand {
+        font-size: 1rem;
+    }
+    
+    /* Stack navigation vertically */
+    .navbar-nav {
+        margin-top: 0.5rem;
+    }
+    
+    .nav-link {
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    /* Adjust status items */
+    .status-item {
+        margin-bottom: 1rem;
+    }
+    
+    /* Full width cards */
+    .card-body {
+        padding: 1rem;
+    }
+    
+    /* Adjust quick stats cards */
+    .col-6 {
+        margin-bottom: 0.75rem;
+    }
+    
+    /* Reduce heading sizes */
+    h1 {
+        font-size: 1.75rem;
+    }
+    
+    h2 {
+        font-size: 1.5rem;
+    }
+    
+    h3 {
+        font-size: 1.25rem;
+    }
+    
+    h4 {
+        font-size: 1.1rem;
+    }
+    
+    /* Adjust threat card layout */
+    .threat-card {
+        padding: 0.75rem;
+    }
+    
+    .threat-card .btn {
+        width: 100%;
+        margin-top: 0.5rem;
+    }
+    
+    /* Stack filter controls */
+    .filter-controls .form-select,
+    .filter-controls .form-control {
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Adjust chart container */
+    .chart-container {
+        height: 200px;
+    }
+    
+    /* Make modals full screen on small devices */
+    .modal-dialog {
+        margin: 0.5rem;
+        max-width: calc(100% - 1rem);
+    }
+    
+    /* Adjust table font size */
+    .table {
+        font-size: 0.875rem;
+    }
+    
+    /* Stack form groups */
+    .row > .col-md-6 {
+        margin-bottom: 0.75rem;
+    }
+    
+    /* Adjust pagination */
+    .pagination {
+        font-size: 0.875rem;
+    }
+    
+    /* Connection status badge */
+    #connection-status {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+    }
+}
+
+/* Mobile Phones (up to 575px) */
+@media (max-width: 575px) {
+    /* Further reduce spacing */
+    .container-fluid {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+    
+    /* Compact navbar */
+    .navbar {
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .navbar-brand {
+        font-size: 0.9rem;
+    }
+    
+    /* Smaller buttons */
+    .btn {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
+    }
+    
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+    
+    /* Compact cards */
+    .card {
+        margin-bottom: 0.75rem;
+    }
+    
+    .card-body {
+        padding: 0.75rem;
+    }
+    
+    .card-title {
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Smaller badges */
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    /* Compact threat cards */
+    .threat-card {
+        padding: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .recent-threat-item {
+        padding: 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    /* Smaller form elements */
+    .form-control, .form-select {
+        font-size: 0.875rem;
+        padding: 0.375rem 0.75rem;
+    }
+    
+    .form-label {
+        font-size: 0.875rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    /* Compact detector items */
+    .detector-item {
+        padding: 0.75rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Adjust chart height */
+    .chart-container {
+        height: 180px;
+    }
+    
+    /* Smaller table text */
+    .table {
+        font-size: 0.75rem;
+    }
+    
+    .table th,
+    .table td {
+        padding: 0.5rem;
+    }
+    
+    /* Compact modal */
+    .modal-header {
+        padding: 0.75rem;
+    }
+    
+    .modal-body {
+        padding: 0.75rem;
+    }
+    
+    .modal-footer {
+        padding: 0.75rem;
+    }
+    
+    .modal-title {
+        font-size: 1rem;
+    }
+    
+    /* Stack all columns on mobile */
+    .col-6 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+    
+    /* Adjust status display */
+    .status-item label {
+        font-size: 0.75rem;
+    }
+    
+    .status-item .h5 {
+        font-size: 1rem;
+    }
+}
+
+/* Landscape Orientation Adjustments */
+@media (max-width: 991px) and (orientation: landscape) {
+    /* Reduce vertical spacing in landscape */
+    .card {
+        margin-bottom: 0.75rem;
+    }
+    
+    .chart-container {
+        height: 220px;
+    }
+    
+    /* Optimize navbar for landscape */
+    .navbar-nav {
+        flex-direction: row;
+    }
+    
+    .nav-link {
+        padding: 0.5rem 0.75rem;
+    }
+}
+
+/* Touch Device Optimizations */
+@media (hover: none) and (pointer: coarse) {
+    /* Larger touch targets */
+    .btn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    .nav-link {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .form-check-input {
+        width: 1.25rem;
+        height: 1.25rem;
+    }
+    
+    /* Remove hover effects on touch devices */
+    .threat-card:hover,
+    .recent-threat-item:hover,
+    .detector-item:hover {
+        background-color: inherit;
+    }
+    
+    /* Add active states instead */
+    .threat-card:active,
+    .recent-threat-item:active,
+    .detector-item:active {
+        background-color: #f8f9fa;
+    }
+}
+
+/* Print Styles */
+@media print {
+    /* Hide navigation and controls */
+    .navbar,
+    .btn,
+    #connection-status,
+    .footer {
+        display: none !important;
+    }
+    
+    /* Optimize for printing */
+    body {
+        background: white;
+    }
+    
+    .card {
+        border: 1px solid #000;
+        page-break-inside: avoid;
+    }
+    
+    /* Show all content */
+    .collapse {
+        display: block !important;
+        height: auto !important;
+    }
+    
+    /* Adjust colors for print */
+    .severity-critical,
+    .severity-high,
+    .severity-medium,
+    .severity-low {
+        color: #000;
+        font-weight: bold;
+    }
+}
+
+/* Animation for new threats */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.new-threat {
+    animation: slideIn 0.3s ease-out;
+}
+
+/* Number Counter Animation */
+@keyframes countUp {
+    from {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.stat-number {
+    display: inline-block;
+}
+
+.stat-number.updated {
+    animation: countUp 0.4s ease-out;
+}
+
+/* Card Glow Effect for Updates */
+@keyframes cardGlow {
+    0%, 100% {
+        box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.15);
+    }
+    50% {
+        box-shadow: 0 0.5rem 1rem rgba(13, 110, 253, 0.3);
+    }
+}
+
+.card.updated {
+    animation: cardGlow 0.6s ease-in-out;
+}
+
+/* Stat Card Number Emphasis */
+.card.text-white h2 {
+    position: relative;
+}
+
+.card.text-white h2::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background-color: rgba(255, 255, 255, 0.5);
+    transition: width 0.3s ease-in-out;
+}
+
+.card.text-white:hover h2::after {
+    width: 60px;
+}
+
+/* Severity Pulse Animation for Critical Threats */
+@keyframes severityPulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+    }
+}
+
+.severity-critical.pulse {
+    animation: severityPulse 2s infinite;
+}
+
+/* Severity Text Utilities */
+.text-severity-critical {
+    color: #dc3545 !important;
+}
+
+.text-severity-high {
+    color: #fd7e14 !important;
+}
+
+.text-severity-medium {
+    color: #ffc107 !important;
+}
+
+.text-severity-low {
+    color: #0dcaf0 !important;
+}
+
+/* Severity Icon Indicators */
+.severity-icon {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.severity-icon.critical {
+    background-color: #dc3545;
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.2);
+}
+
+.severity-icon.high {
+    background-color: #fd7e14;
+    box-shadow: 0 0 0 2px rgba(253, 126, 20, 0.2);
+}
+
+.severity-icon.medium {
+    background-color: #ffc107;
+    box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.2);
+}
+
+.severity-icon.low {
+    background-color: #0dcaf0;
+    box-shadow: 0 0 0 2px rgba(13, 202, 240, 0.2);
+}
+
+.severity-icon:hover {
+    transform: scale(1.3);
+}
+
+/* Active Navigation Link */
+.nav-link.active {
+    font-weight: bold;
+}
+
+/* Footer */
+.footer {
+    margin-top: auto;
+}
+
+/* Dashboard Specific Enhancements */
+
+/* Status Badge Enhancements */
+.badge.bg-success {
+    box-shadow: 0 0 10px rgba(25, 135, 84, 0.3);
+}
+
+.badge.bg-danger {
+    box-shadow: 0 0 10px rgba(220, 53, 69, 0.3);
+}
+
+.badge.bg-secondary {
+    box-shadow: 0 0 10px rgba(108, 117, 125, 0.3);
+}
+
+/* Card Spacing Utilities */
+.card-spacing-sm {
+    margin-bottom: 1rem;
+}
+
+.card-spacing-md {
+    margin-bottom: 1.5rem;
+}
+
+.card-spacing-lg {
+    margin-bottom: 2rem;
+}
+
+/* Card Body Padding Variants */
+.card-body-compact {
+    padding: 1rem;
+}
+
+.card-body-spacious {
+    padding: 2rem;
+}
+
+/* Stat Card Variants */
+.stat-card-critical {
+    background: linear-gradient(135deg, #dc3545 0%, #bb2d3b 100%);
+}
+
+.stat-card-high {
+    background: linear-gradient(135deg, #fd7e14 0%, #dc6502 100%);
+}
+
+.stat-card-medium {
+    background: linear-gradient(135deg, #ffc107 0%, #ffca2c 100%);
+}
+
+.stat-card-low {
+    background: linear-gradient(135deg, #0dcaf0 0%, #31d2f2 100%);
+}
+
+/* Card Header Icon Styling */
+.card-header i.bi {
+    font-size: 1.2rem;
+    vertical-align: middle;
+}
+
+/* System Status Indicators */
+.status-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+    animation: pulse 2s infinite;
+}
+
+.status-indicator.active {
+    background-color: #198754;
+    box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.2);
+}
+
+.status-indicator.inactive {
+    background-color: #6c757d;
+    box-shadow: 0 0 0 3px rgba(108, 117, 125, 0.2);
+    animation: none;
+}
+
+.status-indicator.error {
+    background-color: #dc3545;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.2);
+}
+
+/* Dashboard Grid Improvements */
+.dashboard-row {
+    margin-bottom: 1.5rem;
+}
+
+/* Card Hover Lift Effect */
+.card-lift {
+    transition: all 0.3s ease-in-out;
+}
+
+.card-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.15);
+}
+
+/* Number Display Enhancements */
+.display-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+.display-number-lg {
+    font-size: 3.5rem;
+}
+
+.display-number-sm {
+    font-size: 1.5rem;
+}
+
+/* Card Title Enhancements */
+.card-title-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.card-title-icon i {
+    font-size: 1.3rem;
+}
+
+/* Metric Label Styling */
+.metric-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+}
+
+.metric-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #212529;
+    line-height: 1.2;
+}
+
+/* Dashboard Section Headers */
+.section-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.section-header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #212529;
+    margin: 0;
+}
+
+/* Info Text Styling */
+.info-text {
+    font-size: 0.875rem;
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* Highlight Effect */
+@keyframes highlight {
+    0%, 100% {
+        background-color: transparent;
+    }
+    50% {
+        background-color: rgba(255, 193, 7, 0.2);
+    }
+}
+
+.highlight-update {
+    animation: highlight 1s ease-in-out;
+}

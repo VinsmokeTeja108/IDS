@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - IDS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">Dashboard</h2>
+    </div>
+</div>
+
+<!-- System Status Card -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-activity"></i> System Status</h5>
+                <button id="toggle-monitoring-btn" class="btn btn-sm btn-primary">
+                    <i class="bi bi-play-fill"></i> Start Monitoring
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="status-item">
+                            <label class="text-muted">Status</label>
+                            <div id="system-status" class="h5">
+                                <span class="badge bg-secondary">Unknown</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="status-item">
+                            <label class="text-muted">Interface</label>
+                            <div id="system-interface" class="h5">-</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="status-item">
+                            <label class="text-muted">Uptime</label>
+                            <div id="system-uptime" class="h5">-</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="status-item">
+                            <label class="text-muted">Packets Analyzed</label>
+                            <div id="system-packets" class="h5">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats Cards -->
+<div class="row mb-4">
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card text-white bg-danger">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title mb-0">Critical</h6>
+                        <h2 class="mb-0" id="stat-critical">0</h2>
+                    </div>
+                    <div>
+                        <i class="bi bi-exclamation-octagon" style="font-size: 3rem; opacity: 0.5;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card text-white bg-warning">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title mb-0">High</h6>
+                        <h2 class="mb-0" id="stat-high">0</h2>
+                    </div>
+                    <div>
+                        <i class="bi bi-exclamation-triangle" style="font-size: 3rem; opacity: 0.5;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card text-white" style="background-color: #ffc107;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title mb-0">Medium</h6>
+                        <h2 class="mb-0" id="stat-medium">0</h2>
+                    </div>
+                    <div>
+                        <i class="bi bi-exclamation-circle" style="font-size: 3rem; opacity: 0.5;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card text-white bg-info">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title mb-0">Low</h6>
+                        <h2 class="mb-0" id="stat-low">0</h2>
+                    </div>
+                    <div>
+                        <i class="bi bi-info-circle" style="font-size: 3rem; opacity: 0.5;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Threats -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-clock-history"></i> Recent Threats</h5>
+                <a href="{{ url_for('threats') }}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body">
+                <div id="recent-threats-list">
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-shield-check" style="font-size: 3rem;"></i>
+                        <p class="mt-2">No threats detected</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

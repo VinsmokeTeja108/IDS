@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}Threats - IDS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">Detected Threats</h2>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label for="filter-type" class="form-label">Threat Type</label>
+                        <select id="filter-type" class="form-select">
+                            <option value="">All Types</option>
+                            <option value="port_scan">Port Scan</option>
+                            <option value="icmp_scan">ICMP Scan</option>
+                            <option value="malware">Malware</option>
+                            <option value="brute_force">Brute Force</option>
+                            <option value="attacker_identified">Attacker Identified</option>
+                            <option value="data_exfiltration">Data Exfiltration</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="filter-severity" class="form-label">Severity</label>
+                        <select id="filter-severity" class="form-select">
+                            <option value="">All Severities</option>
+                            <option value="critical">Critical</option>
+                            <option value="high">High</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <label for="search-input" class="form-label">Search</label>
+                        <input type="text" id="search-input" class="form-control" placeholder="Search by IP address or keyword...">
+                    </div>
+                    
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button id="clear-filters-btn" class="btn btn-outline-secondary w-100">
+                            <i class="bi bi-x-circle"></i> Clear Filters
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Threats List -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-list-ul"></i> Threats (<span id="threat-count">0</span>)</h5>
+            </div>
+            <div class="card-body">
+                <div id="threats-list">
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-shield-check" style="font-size: 3rem;"></i>
+                        <p class="mt-2">No threats detected</p>
+                    </div>
+                </div>
+                
+                <div id="loading-indicator" class="text-center py-4" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Threat Details Modal -->
+<div class="modal fade" id="threatDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Threat Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="text-muted">Threat Type</label>
+                        <div id="detail-type" class="h6">-</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted">Severity</label>
+                        <div id="detail-severity">-</div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="text-muted">Timestamp</label>
+                        <div id="detail-timestamp" class="h6">-</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted">Threat ID</label>
+                        <div id="detail-id" class="h6 text-muted small">-</div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="text-muted">Source IP</label>
+                        <div id="detail-source-ip" class="h6">-</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted">Destination IP</label>
+                        <div id="detail-dest-ip" class="h6">-</div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="text-muted">Protocol</label>
+                        <div id="detail-protocol" class="h6">-</div>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="mb-3">
+                    <label class="text-muted">Description</label>
+                    <div id="detail-description" class="alert alert-info">-</div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="text-muted">Severity Justification</label>
+                    <div id="detail-justification" class="alert alert-warning">-</div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="text-muted">Recommended Actions</label>
+                    <div id="detail-recommendations">
+                        <ul id="recommendations-list"></ul>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="text-muted">Technical Details</label>
+                    <pre id="detail-raw-data" class="bg-light p-3 rounded" style="max-height: 200px; overflow-y: auto;"></pre>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/threats.js') }}"></script>
+{% endblock %}

@@ -2,6 +2,7 @@
 
 import signal
 import sys
+import threading
 from typing import Optional
 from datetime import datetime
 
@@ -30,12 +31,14 @@ class IDSApplication:
     analysis, and notification. Manages the main detection loop and graceful shutdown.
     """
     
-    def __init__(self, config_path: str):
+    def __init__(self, config_path: str, event_bus=None, threat_store=None):
         """
         Initialize the IDS application.
         
         Args:
             config_path: Path to the configuration file
+            event_bus: Optional EventBus for real-time event broadcasting
+            threat_store: Optional ThreatStore for in-memory threat storage
         """
         self.config_path = config_path
         self.config_manager: Optional[ConfigurationManager] = None
@@ -46,8 +49,17 @@ class IDSApplication:
         self.notification_service: Optional[NotificationService] = None
         self.attacker_identifier: Optional[AttackerIdentifier] = None
         
+        # Web UI integration
+        self.event_bus = event_bus
+        self.threat_store = threat_store
+        
         self._running = False
         self._shutdown_requested = False
+        self._start_time: Optional[datetime] = None
+        self._monitoring_thread: Optional[threading.Thread] = None
+        
+        # Store detector instances for management
+        self._detectors = {}
         
         # Register signal handlers for graceful shutdown
         signal.signal(signal.SIGINT, self._signal_handler)
@@ -128,6 +140,7 @@ class IDSApplication:
                 time_window=60
             )
             self.detection_engine.register_detector(port_scan_detector)
+            self._detectors['port_scan'] = port_scan_detector
             
             # ICMP scan detector
             icmp_scan_detector = ICMPScanDetector(
@@ -135,6 +148,7 @@ class IDSApplication:
                 time_window=30
             )
             self.detection_engine.register_detector(icmp_scan_detector)
+            self._detectors['icmp_scan'] = icmp_scan_detector
             
             # Brute force detector
             brute_force_detector = BruteForceDetector(
@@ -142,10 +156,12 @@ class IDSApplication:
                 time_window=60
             )
             self.detection_engine.register_detector(brute_force_detector)
+            self._detectors['brute_force'] = brute_force_detector
             
             # Malware detector
             malware_detector = MalwareDetector()
             self.detection_engine.register_detector(malware_detector)
+            self._detectors['malware'] = malware_detector
             
             # Data exfiltration detector
             data_exfiltration_detector = DataExfiltrationDetector(
@@ -153,12 +169,14 @@ class IDSApplication:
                 time_window=60
             )
             self.detection_engine.register_detector(data_exfiltration_detector)
+            self._detectors['data_exfiltration'] = data_exfiltration_detector
             
             # Attacker identifier (not registered with detection engine)
             self.attacker_identifier = AttackerIdentifier(
                 threshold=2,
                 time_window=300
             )
+            self._detectors['attacker_identifier'] = self.attacker_identifier
             
             self.logger.log_system_event(
                 "IDS initialization complete",
@@ -211,6 +229,15 @@ class IDSApplication:
             # Start packet capture
             self.packet_capture.start_capture(interface)
             self._running = True
+            self._start_time = datetime.now()
+            
+            # Emit status change event
+            if self.event_bus:
+                self.event_bus.publish('status_changed', {
+                    'status': 'running',
+                    'interface': interface,
+                    'timestamp': self._start_time.isoformat()
+                })
             
             # Main detection loop
             packet_count = 0
@@ -234,6 +261,12 @@ class IDSApplication:
                     # Send notification
                     self.notification_service.notify(threat_analysis)
                     
+                    # Store threat and emit event for web UI
+                    if self.threat_store:
+                        self.threat_store.add_threat(threat_analysis)
+                    if self.event_bus:
+                        self.event_bus.publish('threat_detected', threat_analysis)
+                    
                     # Check if this indicates an attacker
                     attacker_event = self.attacker_identifier.record_threat_event(threat_event)
                     if attacker_event:
@@ -241,6 +274,12 @@ class IDSApplication:
                         attacker_analysis = self.threat_analyzer.analyze(attacker_event)
                         self.logger.log_threat(attacker_analysis)
                         self.notification_service.notify(attacker_analysis)
+                        
+                        # Store and emit attacker event
+                        if self.threat_store:
+                            self.threat_store.add_threat(attacker_analysis)
+                        if self.event_bus:
+                            self.event_bus.publish('threat_detected', attacker_analysis)
                 
                 # Periodic status update (every 1000 packets)
                 if packet_count % 1000 == 0:
@@ -250,6 +289,10 @@ class IDSApplication:
                         level="INFO",
                         details=stats
                     )
+                    
+                    # Emit stats update event
+                    if self.event_bus:
+                        self.event_bus.publish('stats_updated', stats)
             
         except CaptureException as e:
             self.logger.log_system_event(
@@ -317,6 +360,13 @@ class IDSApplication:
             print(f"  Packets analyzed: {stats['packets_analyzed']}")
             print(f"  Threats detected: {stats['threats_detected']}")
         
+        # Emit status change event
+        if self.event_bus:
+            self.event_bus.publish('status_changed', {
+                'status': 'stopped',
+                'timestamp': datetime.now().isoformat()
+            })
+        
         print("IDS shutdown complete.")
     
     def _is_initialized(self) -> bool:
@@ -347,6 +397,111 @@ class IDSApplication:
         print(f"\nReceived signal {signum}, initiating shutdown...")
         self.shutdown()
         sys.exit(0)
+    
+    def get_current_status(self) -> dict:
+        """
+        Get current IDS status for web UI.
+        
+        Returns:
+            Dictionary containing current status information including:
+            - running: Whether IDS is currently running
+            - interface: Network interface being monitored
+            - uptime: Seconds since monitoring started
+            - packet_count: Number of packets analyzed
+            - threat_count: Number of threats detected
+        """
+        status = {
+            'running': self._running,
+            'interface': None,
+            'uptime': 0,
+            'packet_count': 0,
+            'threat_count': 0
+        }
+        
+        if self.config_manager:
+            status['interface'] = self.config_manager.get('detection.network_interface')
+        
+        if self._running and self._start_time:
+            uptime_delta = datetime.now() - self._start_time
+            status['uptime'] = int(uptime_delta.total_seconds())
+        
+        if self.detection_engine:
+            stats = self.detection_engine.get_statistics()
+            status['packet_count'] = stats.get('packets_analyzed', 0)
+            status['threat_count'] = stats.get('threats_detected', 0)
+        
+        return status
+    
+    def get_detector_status(self) -> list:
+        """
+        Get status of all detectors.
+        
+        Returns:
+            List of dictionaries containing detector information:
+            - name: Detector name
+            - enabled: Whether detector is enabled
+            - description: Detector description
+            - type: Detector type
+        """
+        detector_info = []
+        
+        detector_descriptions = {
+            'port_scan': {
+                'description': 'Detects port scanning attempts by monitoring connection patterns',
+                'type': 'port_scan'
+            },
+            'icmp_scan': {
+                'description': 'Detects ICMP scanning and ping sweeps',
+                'type': 'icmp_scan'
+            },
+            'brute_force': {
+                'description': 'Detects brute force authentication attempts',
+                'type': 'brute_force'
+            },
+            'malware': {
+                'description': 'Detects known malware signatures and suspicious patterns',
+                'type': 'malware'
+            },
+            'data_exfiltration': {
+                'description': 'Detects large data transfers that may indicate data exfiltration',
+                'type': 'data_exfiltration'
+            },
+            'attacker_identifier': {
+                'description': 'Identifies repeat attackers based on threat patterns',
+                'type': 'attacker_identified'
+            }
+        }
+        
+        for name, detector in self._detectors.items():
+            info = {
+                'name': name,
+                'enabled': detector.enabled if hasattr(detector, 'enabled') else True,
+                'description': detector_descriptions.get(name, {}).get('description', 'No description available'),
+                'type': detector_descriptions.get(name, {}).get('type', name)
+            }
+            detector_info.append(info)
+        
+        return detector_info
+    
+    def start_monitoring_async(self) -> None:
+        """
+        Start monitoring in a background thread.
+        
+        This allows the IDS to run without blocking the main thread,
+        which is useful for web UI integration.
+        
+        Raises:
+            IDSException: If IDS is already running or not initialized
+        """
+        if self._running:
+            raise IDSException("IDS is already running")
+        
+        if not self._is_initialized():
+            raise IDSException("IDS not initialized. Call initialize() first.")
+        
+        # Create and start monitoring thread
+        self._monitoring_thread = threading.Thread(target=self.run, daemon=True)
+        self._monitoring_thread.start()
     
     @property
     def is_running(self) -> bool:
