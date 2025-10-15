@@ -162,6 +162,20 @@ class IDSLogger:
         log_level = getattr(logging, level.upper(), logging.INFO)
         self._log_json(log_level, log_data)
     
+    def set_level(self, level: str) -> None:
+        """
+        Set the logging level dynamically.
+        
+        Args:
+            level: Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+        """
+        log_level = getattr(logging, level.upper(), logging.INFO)
+        self.logger.setLevel(log_level)
+        self.log_system_event(
+            f"Logging level changed to {level.upper()}",
+            level="INFO"
+        )
+    
     def _get_log_level_from_severity(self, severity: SeverityLevel) -> int:
         """
         Map threat severity to logging level.

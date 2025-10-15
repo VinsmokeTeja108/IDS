@@ -48,6 +48,7 @@ class NotificationService:
         self._batch_queue: deque = deque()
         self._batch_lock = threading.Lock()
         self._batch_timer: Optional[threading.Timer] = None
+        self._dry_run = False  # Dry-run mode flag
     
     def notify(self, threat_analysis: ThreatAnalysis) -> bool:
         """
@@ -115,6 +116,21 @@ class NotificationService:
             subject = f"[IDS ALERT - BATCH] {len(analyses)} Threats Detected"
             body = self._format_batch_email(analyses)
             
+            # In dry-run mode, only log without sending
+            if self._dry_run:
+                self.logger.log_notification(
+                    status="dry-run",
+                    recipient=", ".join(self.recipients),
+                    threat_type="batch",
+                    severity=f"{len(analyses)} threats"
+                )
+                self.logger.log_system_event(
+                    "Dry-run batch notification (not sent)",
+                    level="INFO",
+                    details={"subject": subject, "threat_count": len(analyses)}
+                )
+                return True
+            
             # Send to all recipients
             success = True
             for recipient in self.recipients:
@@ -156,6 +172,21 @@ class NotificationService:
             True if sent to at least one recipient successfully
         """
         subject, body = self.email_service.format_threat_email(threat_analysis)
+        
+        # In dry-run mode, only log without sending
+        if self._dry_run:
+            self.logger.log_notification(
+                status="dry-run",
+                recipient=", ".join(self.recipients),
+                threat_type=threat_analysis.threat_event.threat_type.value,
+                severity=threat_analysis.severity.value
+            )
+            self.logger.log_system_event(
+                "Dry-run notification (not sent)",
+                level="INFO",
+                details={"subject": subject}
+            )
+            return True
         
         success = True
         for recipient in self.recipients:

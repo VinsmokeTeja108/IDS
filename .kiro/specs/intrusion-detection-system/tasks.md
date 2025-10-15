@@ -123,7 +123,12 @@
     - _Requirements: 2.1, 2.2, 2.3, 4.1_
 
 - [ ] 6. Implement packet capture engine
-  - [ ] 6.1 Create `PacketCaptureEngine` class using Scapy
+  - [x] 6.1 Create `PacketCaptureEngine` class using Scapy
+
+
+
+
+
     - Implement `start_capture()` method to begin packet sniffing on specified interface
     - Implement `stop_capture()` method to stop packet capture
     - Implement `get_packet_stream()` method to yield captured packets
@@ -137,51 +142,91 @@
     - _Requirements: 7.1, 7.4_
 
 - [ ] 7. Implement threat detection engine and detectors
-  - [ ] 7.1 Create `ThreatDetector` abstract base class
+  - [x] 7.1 Create `ThreatDetector` abstract base class
+
+
+
+
+
     - Define abstract `detect()` method interface
     - _Requirements: 1.1_
   
-  - [ ] 7.2 Implement `PortScanDetector` class
+  - [x] 7.2 Implement `PortScanDetector` class
+
+
+
+
+
     - Track SYN packets without corresponding ACK responses
     - Detect multiple port connection attempts from single source IP
     - Trigger alert when threshold exceeded (configurable, default 10 ports in 60 seconds)
     - Generate `ThreatEvent` with port scan details
     - _Requirements: 1.3_
   
-  - [ ] 7.3 Implement `ICMPScanDetector` class
+  - [x] 7.3 Implement `ICMPScanDetector` class
+
+
+
+
+
     - Monitor ICMP echo request packets
     - Track ICMP requests to multiple destination hosts from single source
     - Trigger alert when threshold exceeded (configurable, default 5 hosts in 30 seconds)
     - Generate `ThreatEvent` with ICMP scan details
     - _Requirements: 1.4_
   
-  - [ ] 7.4 Implement `BruteForceDetector` class
+  - [x] 7.4 Implement `BruteForceDetector` class
+
+
+
+
+
     - Track failed authentication attempts (monitor TCP RST packets on common auth ports: 22, 3389, 21)
     - Trigger alert when threshold exceeded (configurable, default 5 attempts in 60 seconds)
     - Generate `ThreatEvent` with brute force details
     - _Requirements: 1.5_
   
-  - [ ] 7.5 Implement `MalwareDetector` class
+  - [x] 7.5 Implement `MalwareDetector` class
+
+
+
+
+
     - Implement basic signature-based detection using pattern matching on packet payloads
     - Create signature database with common malware patterns
     - Scan packet payloads for known malicious signatures
     - Generate `ThreatEvent` with malware details
     - _Requirements: 1.2_
   
-  - [ ] 7.6 Implement `DataExfiltrationDetector` class
+  - [x] 7.6 Implement `DataExfiltrationDetector` class
+
+
+
+
+
     - Monitor outbound traffic volume per destination
     - Track unusual large data transfers
     - Trigger alert for suspicious outbound patterns
     - Generate `ThreatEvent` with exfiltration details
     - _Requirements: 1.6_
   
-  - [ ] 7.7 Implement `AttackerIdentifier` class
+  - [x] 7.7 Implement `AttackerIdentifier` class
+
+
+
+
+
     - Aggregate threat events by source IP
     - Identify IPs with multiple threat indicators
     - Generate `ThreatEvent` for identified attackers
     - _Requirements: 1.1_
   
-  - [ ] 7.8 Create `ThreatDetectionEngine` orchestrator class
+  - [x] 7.8 Create `ThreatDetectionEngine` orchestrator class
+
+
+
+
+
     - Implement `register_detector()` method to add detector modules
     - Implement `analyze_packet()` method to run all detectors on each packet
     - Coordinate between detectors and maintain detection state
@@ -195,14 +240,25 @@
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6_
 
 - [ ] 8. Implement main application orchestration
-  - [ ] 8.1 Create main `IDSApplication` class
+  - [x] 8.1 Create main `IDSApplication` class
+
+
+
+
+
     - Implement initialization: load configuration, set up logging, initialize all components
     - Implement main loop: capture packets → detect threats → analyze → notify
     - Implement graceful shutdown handling
     - Wire together all components: `PacketCaptureEngine`, `ThreatDetectionEngine`, `ThreatAnalyzer`, `NotificationService`
     - _Requirements: 1.1, 2.1, 3.1, 4.1, 5.1, 6.1, 7.1_
   
-  - [ ] 8.2 Create command-line interface
+  - [-] 8.2 Create command-line interface
+
+
+
+
+
+
     - Implement argument parsing for config file path and interface selection
     - Add options for verbose logging and dry-run mode
     - Implement startup banner with system information
