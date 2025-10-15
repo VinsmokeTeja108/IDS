@@ -53,14 +53,24 @@
     - _Requirements: 6.4_
 
 - [ ] 4. Implement email notification system
-  - [ ] 4.1 Create `EmailService` class with SMTP support
+  - [x] 4.1 Create `EmailService` class with SMTP support
+
+
+
+
+
     - Implement `send_email()` method with SMTP connection and TLS support
     - Implement retry logic with exponential backoff (up to 3 attempts)
     - Implement `format_threat_email()` method to generate email subject and body from `ThreatAnalysis`
     - Add error handling for SMTP connection failures and authentication errors
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
   
-  - [ ] 4.2 Create `NotificationService` class with batching logic
+  - [x] 4.2 Create `NotificationService` class with batching logic
+
+
+
+
+
     - Implement `notify()` method for single threat notifications
     - Implement `batch_notifications()` method for batched alerts
     - Implement batching window logic (collect threats within 5-minute window)
@@ -75,13 +85,29 @@
     - _Requirements: 3.1, 3.5, 3.6_
 
 - [ ] 5. Implement threat analysis and severity classification
-  - [ ] 5.1 Create `SeverityClassifier` class
+  - [x] 5.1 Create `SeverityClassifier` class
+
+
+
+
+
+
+
+
+
+
     - Implement `classify()` method with base severity assignment by threat type
     - Implement escalation logic based on frequency and source reputation
     - Implement severity justification generation
     - _Requirements: 2.1, 2.2, 2.3, 2.4_
   
-  - [ ] 5.2 Create `ThreatAnalyzer` class
+  - [-] 5.2 Create `ThreatAnalyzer` class
+
+
+
+
+
+
     - Implement `analyze()` method to generate `ThreatAnalysis` from `ThreatEvent`
     - Implement `get_recommendations()` method with threat-specific remediation steps
     - Create recommendation templates for each threat type (port scan, ICMP scan, malware, brute force, data exfiltration)
