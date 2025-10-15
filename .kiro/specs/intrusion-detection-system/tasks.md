@@ -291,7 +291,9 @@
     - _Requirements: 7.1_
 
 - [ ] 9. Create installation and deployment files
-  - [-] 9.1 Create `requirements.txt` with dependencies
+  - [x] 9.1 Create `requirements.txt` with dependencies
+
+
 
 
 
@@ -299,7 +301,12 @@
     - Specify version constraints
     - _Requirements: 5.1_
   
-  - [ ] 9.2 Create README.md with setup instructions
+  - [x] 9.2 Create README.md with setup instructions
+
+
+
+
+
     - Document installation steps
     - Document configuration file format
     - Document running the IDS
@@ -307,7 +314,12 @@
     - Document privilege requirements
     - _Requirements: 5.1, 7.1_
   
-  - [ ] 9.3 Create systemd service file for Linux deployment
+  - [x] 9.3 Create systemd service file for Linux deployment
+
+
+
+
+
     - Create `ids.service` file for systemd
     - Configure service to run as root with auto-restart
     - _Requirements: 7.1_

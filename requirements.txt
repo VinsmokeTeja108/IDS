@@ -1,2 +1,6 @@
-scapy>=2.5.0
-pyyaml>=6.0
+# Core dependencies for IDS functionality
+scapy>=2.5.0,<3.0.0
+pyyaml>=6.0,<7.0.0
+
+# Development and testing dependencies (optional)
+pytest>=7.0.0,<8.0.0

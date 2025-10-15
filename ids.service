@@ -1,0 +1,47 @@
+[Unit]
+Description=Intrusion Detection System (IDS)
+Documentation=file:README.md
+After=network.target network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=60
+StartLimitBurst=3
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/opt/ids
+ExecStart=/usr/bin/python3 /opt/ids/ids_main.py --config /etc/ids/config.yaml
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+RestartSec=10
+TimeoutStartSec=30
+TimeoutStopSec=30
+
+# Security settings
+NoNewPrivileges=false
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/var/log/ids /etc/ids
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=4096
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=ids
+
+# Environment
+Environment=PYTHONPATH=/opt/ids
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
