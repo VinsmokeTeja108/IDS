@@ -101,7 +101,9 @@
     - Implement severity justification generation
     - _Requirements: 2.1, 2.2, 2.3, 2.4_
   
-  - [-] 5.2 Create `ThreatAnalyzer` class
+  - [x] 5.2 Create `ThreatAnalyzer` class
+
+
 
 
 
