@@ -9,7 +9,8 @@
   - Create basic Flask application structure with `app.py` as entry point
   - _Requirements: 15.1_
 
-- [ ] 2. Implement IDS integration layer
+- [x] 2. Implement IDS integration layer
+
   - [x] 2.1 Create EventBus class for real-time event broadcasting
 
 
@@ -130,7 +131,8 @@
     - Return data formatted for Chart.js visualization
     - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.5, 12.6_
 
-- [ ] 4. Implement WebSocket real-time communication
+- [x] 4. Implement WebSocket real-time communication
+
   - [x] 4.1 Set up Flask-SocketIO for WebSocket support
 
 
@@ -308,7 +310,9 @@
     - Update detector status in real-time
     - _Requirements: 14.1, 14.2, 14.3, 14.4, 14.5, 14.6_
 
-- [ ] 7. Create frontend CSS styling
+- [x] 7. Create frontend CSS styling
+
+
   - [x] 7.1 Create custom CSS for severity color coding
 
 

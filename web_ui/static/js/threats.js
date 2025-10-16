@@ -18,12 +18,15 @@ async function fetchThreats() {
             throw new Error('Failed to fetch threats');
         }
         
-        const threats = await response.json();
-        allThreats = threats;
+        const data = await response.json();
+        // Handle both array and object responses
+        allThreats = Array.isArray(data) ? data : (data.threats || []);
         applyFilters();
     } catch (error) {
         console.error('Error fetching threats:', error);
         showToast('Error', 'Failed to fetch threats', 'danger');
+        allThreats = [];
+        applyFilters();
     } finally {
         showLoading(false);
     }

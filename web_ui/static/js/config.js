@@ -284,11 +284,15 @@ async function fetchDetectors() {
             throw new Error('Failed to fetch detectors');
         }
         
-        const detectors = await response.json();
+        const data = await response.json();
+        // Handle both array and object responses
+        const detectors = Array.isArray(data) ? data : (data.detectors || []);
         displayDetectors(detectors);
     } catch (error) {
         console.error('Error fetching detectors:', error);
         showToast('Error', 'Failed to fetch detectors', 'danger');
+        // Display empty state instead of error
+        displayDetectors([]);
     }
 }
 

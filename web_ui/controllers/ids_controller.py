@@ -509,37 +509,46 @@ class IDSController:
                 print(f"{detector['name']}: {'enabled' if detector['enabled'] else 'disabled'}")
         """
         try:
-            if not self.ids_app or not self.ids_app.detection_engine:
+            # Use get_detector_status from IDS application if available
+            if self.ids_app and hasattr(self.ids_app, 'get_detector_status'):
+                return self.ids_app.get_detector_status()
+            
+            # Fallback: check if IDS is initialized
+            if not self.ids_app:
                 self.logger.warning("Cannot get detector status: IDS not initialized")
                 return []
             
-            detectors = self.ids_app.detection_engine._detectors
-            detector_info = []
+            # Try to get detectors from _detectors dictionary
+            if hasattr(self.ids_app, '_detectors') and self.ids_app._detectors:
+                detector_info = []
+                
+                # Detector descriptions
+                descriptions = {
+                    'port_scan': 'Detects port scanning attempts by monitoring connection patterns',
+                    'icmp_scan': 'Detects ICMP scanning and ping sweeps',
+                    'brute_force': 'Detects brute force authentication attempts',
+                    'malware': 'Detects known malware signatures and suspicious patterns',
+                    'data_exfiltration': 'Detects large data transfers that may indicate data exfiltration',
+                    'attacker_identifier': 'Identifies repeat attackers based on threat patterns'
+                }
+                
+                for detector_key, detector in self.ids_app._detectors.items():
+                    detector_name = detector.__class__.__name__
+                    detector_info.append({
+                        'name': detector_name,
+                        'type': detector_key,
+                        'enabled': getattr(detector, 'enabled', True),
+                        'description': descriptions.get(detector_key, 'Threat detector')
+                    })
+                
+                self.logger.debug(f"Retrieved status for {len(detector_info)} detectors")
+                return detector_info
             
-            # Detector descriptions
-            descriptions = {
-                'PortScanDetector': 'Detects port scanning attempts',
-                'ICMPScanDetector': 'Detects ICMP scanning and ping sweeps',
-                'BruteForceDetector': 'Detects brute force authentication attempts',
-                'MalwareDetector': 'Detects known malware signatures',
-                'DataExfiltrationDetector': 'Detects large data transfers',
-                'AttackerIdentifier': 'Identifies repeat attackers'
-            }
-            
-            for detector in detectors:
-                detector_name = detector.__class__.__name__
-                detector_info.append({
-                    'name': detector_name,
-                    'type': detector_name.replace('Detector', '').lower(),
-                    'enabled': True,  # All registered detectors are currently enabled
-                    'description': descriptions.get(detector_name, 'Threat detector')
-                })
-            
-            self.logger.debug(f"Retrieved status for {len(detector_info)} detectors")
-            return detector_info
+            self.logger.warning("Cannot get detector status: No detectors found")
+            return []
             
         except Exception as e:
-            self.logger.error(f"Error retrieving detector status: {e}")
+            self.logger.error(f"Error retrieving detector status: {e}", exc_info=True)
             return []
     
     def _run_monitoring(self) -> None:

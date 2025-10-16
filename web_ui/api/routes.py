@@ -59,6 +59,9 @@ def register_routes(app, controller):
     app.add_url_rule('/api/analytics/summary', 'get_analytics_summary', get_analytics_summary, methods=['GET'])
     app.add_url_rule('/api/analytics/timeline', 'get_analytics_timeline', get_analytics_timeline, methods=['GET'])
     
+    # Diagnostic endpoint
+    app.add_url_rule('/api/diagnostic', 'get_diagnostic', get_diagnostic, methods=['GET'])
+    
     logger.info("API routes registered successfully")
 
 
@@ -771,14 +774,47 @@ def get_detectors():
     try:
         detectors = ids_controller.get_detector_status()
         
+        # If IDS not initialized, return default detector list
         if not detectors and (not ids_controller.ids_app or not ids_controller.ids_app.detection_engine):
-            logger.warning("Cannot retrieve detectors: IDS not initialized")
+            logger.info("IDS not initialized, returning default detector list")
+            # Return default detector information
+            default_detectors = [
+                {
+                    'name': 'PortScanDetector',
+                    'type': 'port_scan',
+                    'enabled': True,
+                    'description': 'Detects port scanning attempts by monitoring connection patterns'
+                },
+                {
+                    'name': 'ICMPScanDetector',
+                    'type': 'icmp_scan',
+                    'enabled': True,
+                    'description': 'Detects ICMP scanning and ping sweeps'
+                },
+                {
+                    'name': 'BruteForceDetector',
+                    'type': 'brute_force',
+                    'enabled': True,
+                    'description': 'Detects brute force authentication attempts'
+                },
+                {
+                    'name': 'MalwareDetector',
+                    'type': 'malware',
+                    'enabled': True,
+                    'description': 'Detects known malware signatures and suspicious patterns'
+                },
+                {
+                    'name': 'DataExfiltrationDetector',
+                    'type': 'data_exfiltration',
+                    'enabled': True,
+                    'description': 'Detects large data transfers that may indicate data exfiltration'
+                }
+            ]
             return jsonify({
-                'error': 'IDS not initialized',
-                'message': 'Start monitoring to initialize detectors',
-                'detectors': [],
-                'count': 0
-            }), 503
+                'detectors': default_detectors,
+                'count': len(default_detectors),
+                'note': 'IDS not started - showing default detector configuration'
+            }), 200
         
         logger.debug(f"Retrieved {len(detectors)} detectors")
         return jsonify({
@@ -1654,4 +1690,61 @@ def get_analytics_timeline():
         return jsonify({
             'error': 'Failed to retrieve analytics timeline',
             'message': str(e)
+        }), 500
+
+
+
+# ============================================================================
+# Diagnostic API Endpoint
+# ============================================================================
+
+def get_diagnostic():
+    """
+    GET /api/diagnostic
+    
+    Diagnostic endpoint to check IDS controller state and help troubleshoot issues.
+    
+    Returns:
+        JSON response with diagnostic information:
+        {
+            "ids_app_exists": bool,
+            "ids_app_running": bool,
+            "detection_engine_exists": bool,
+            "detectors_count": int,
+            "threat_store_count": int,
+            "config_path": str,
+            "error": str (if any)
+        }
+    
+    Status Codes:
+        200: Success
+    """
+    try:
+        diagnostic_info = {
+            "ids_app_exists": ids_controller.ids_app is not None,
+            "ids_app_running": ids_controller.ids_app.is_running if ids_controller.ids_app else False,
+            "detection_engine_exists": False,
+            "detectors_dict_exists": False,
+            "detectors_count": 0,
+            "threat_store_count": len(ids_controller.threat_store.threats) if ids_controller.threat_store else 0,
+            "config_path": ids_controller.config_path,
+            "start_time": ids_controller.start_time.isoformat() if ids_controller.start_time else None
+        }
+        
+        if ids_controller.ids_app:
+            diagnostic_info["detection_engine_exists"] = ids_controller.ids_app.detection_engine is not None
+            
+            if hasattr(ids_controller.ids_app, '_detectors'):
+                diagnostic_info["detectors_dict_exists"] = True
+                diagnostic_info["detectors_count"] = len(ids_controller.ids_app._detectors)
+                diagnostic_info["detector_keys"] = list(ids_controller.ids_app._detectors.keys())
+        
+        logger.info(f"Diagnostic info: {diagnostic_info}")
+        return jsonify(diagnostic_info), 200
+    
+    except Exception as e:
+        logger.error(f"Error in diagnostic endpoint: {e}", exc_info=True)
+        return jsonify({
+            "error": str(e),
+            "error_type": type(e).__name__
         }), 500

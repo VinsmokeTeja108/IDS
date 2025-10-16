@@ -61,9 +61,14 @@ class IDSApplication:
         # Store detector instances for management
         self._detectors = {}
         
-        # Register signal handlers for graceful shutdown
-        signal.signal(signal.SIGINT, self._signal_handler)
-        signal.signal(signal.SIGTERM, self._signal_handler)
+        # Register signal handlers for graceful shutdown (only in main thread)
+        try:
+            signal.signal(signal.SIGINT, self._signal_handler)
+            signal.signal(signal.SIGTERM, self._signal_handler)
+        except ValueError:
+            # Signal handlers can only be registered in the main thread
+            # This is expected when running from web UI
+            pass
     
     def initialize(self) -> None:
         """
