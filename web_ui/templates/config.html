@@ -49,48 +49,39 @@
                     <!-- Email Settings Tab -->
                     <div class="tab-pane fade show active" id="email-panel" role="tabpanel">
                         <h5 class="mb-3">Email Notification Settings</h5>
+                        <p class="text-muted">Configure email notifications for threat alerts</p>
+                        
                         <form id="email-form">
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label for="smtp-host" class="form-label">SMTP Host</label>
-                                    <input type="text" class="form-control" id="smtp-host" placeholder="smtp.gmail.com">
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="smtp-port" class="form-label">SMTP Port</label>
-                                    <input type="number" class="form-control" id="smtp-port" placeholder="587">
-                                </div>
+                            <div class="mb-3">
+                                <label for="sender-email" class="form-label">Sender Email Address</label>
+                                <input type="email" class="form-control" id="sender-email" placeholder="your-email@gmail.com" required>
+                                <div class="form-text">Gmail, Outlook, and Yahoo are automatically configured</div>
                             </div>
                             
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label for="smtp-username" class="form-label">Username</label>
-                                    <input type="text" class="form-control" id="smtp-username" placeholder="[email]">
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="smtp-password" class="form-label">Password</label>
-                                    <input type="password" class="form-control" id="smtp-password" placeholder="••••••••">
+                            <div class="mb-3">
+                                <label for="sender-password" class="form-label">Email Password / App Password</label>
+                                <input type="password" class="form-control" id="sender-password" placeholder="••••••••" required>
+                                <div class="form-text">
+                                    For Gmail: Use an <a href="https://support.google.com/accounts/answer/185833" target="_blank">App Password</a>
                                 </div>
                             </div>
                             
                             <div class="mb-3">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="smtp-use-tls">
-                                    <label class="form-check-label" for="smtp-use-tls">
-                                        Use TLS/STARTTLS
-                                    </label>
-                                </div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="email-recipients" class="form-label">Recipients</label>
+                                <label for="email-recipients" class="form-label">Recipient Email Addresses</label>
                                 <div id="recipients-list" class="mb-2"></div>
                                 <div class="input-group">
-                                    <input type="email" class="form-control" id="new-recipient" placeholder="[email]">
+                                    <input type="email" class="form-control" id="new-recipient" placeholder="recipient@example.com">
                                     <button class="btn btn-outline-secondary" type="button" id="add-recipient-btn">
                                         <i class="bi bi-plus"></i> Add
                                     </button>
                                 </div>
+                                <div class="form-text">Add one or more email addresses to receive threat alerts</div>
                             </div>
+                            
+                            <!-- Hidden fields for auto-detected SMTP settings -->
+                            <input type="hidden" id="smtp-host">
+                            <input type="hidden" id="smtp-port">
+                            <input type="hidden" id="smtp-use-tls" value="true">
                             
                             <div class="d-flex gap-2">
                                 <button type="button" class="btn btn-primary" id="test-email-btn">

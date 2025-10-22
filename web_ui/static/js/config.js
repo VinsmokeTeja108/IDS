@@ -19,18 +19,43 @@ async function fetchConfiguration() {
     }
 }
 
+// Auto-detect SMTP settings based on email provider
+function autoDetectSMTPSettings(email) {
+    const domain = email.split('@')[1]?.toLowerCase();
+    
+    const smtpSettings = {
+        'gmail.com': { host: 'smtp.gmail.com', port: 587, tls: true },
+        'googlemail.com': { host: 'smtp.gmail.com', port: 587, tls: true },
+        'outlook.com': { host: 'smtp-mail.outlook.com', port: 587, tls: true },
+        'hotmail.com': { host: 'smtp-mail.outlook.com', port: 587, tls: true },
+        'live.com': { host: 'smtp-mail.outlook.com', port: 587, tls: true },
+        'yahoo.com': { host: 'smtp.mail.yahoo.com', port: 587, tls: true },
+        'yahoo.co.uk': { host: 'smtp.mail.yahoo.co.uk', port: 587, tls: true },
+        'aol.com': { host: 'smtp.aol.com', port: 587, tls: true },
+        'icloud.com': { host: 'smtp.mail.me.com', port: 587, tls: true },
+        'me.com': { host: 'smtp.mail.me.com', port: 587, tls: true }
+    };
+    
+    return smtpSettings[domain] || { host: 'smtp.gmail.com', port: 587, tls: true };
+}
+
 // Populate all configuration forms
 function populateConfigurationForms(config) {
     // Email settings
     if (config.email) {
-        document.getElementById('smtp-host').value = config.email.smtp_host || '';
-        document.getElementById('smtp-port').value = config.email.smtp_port || 587;
-        document.getElementById('smtp-username').value = config.email.username || '';
+        document.getElementById('sender-email').value = config.email.username || '';
         // Don't populate password for security
-        document.getElementById('smtp-use-tls').checked = config.email.use_tls !== false;
         
         emailRecipients = config.email.recipients || [];
         updateRecipientsList();
+        
+        // Auto-detect SMTP settings if email is present
+        if (config.email.username) {
+            const settings = autoDetectSMTPSettings(config.email.username);
+            document.getElementById('smtp-host').value = settings.host;
+            document.getElementById('smtp-port').value = settings.port;
+            document.getElementById('smtp-use-tls').value = settings.tls;
+        }
     }
     
     // Detection settings
@@ -155,16 +180,21 @@ async function saveEmailConfiguration(e) {
         return;
     }
     
+    const senderEmail = document.getElementById('sender-email').value.trim();
+    const password = document.getElementById('sender-password').value;
+    
+    // Auto-detect SMTP settings
+    const smtpSettings = autoDetectSMTPSettings(senderEmail);
+    
     const emailConfig = {
-        smtp_host: document.getElementById('smtp-host').value.trim(),
-        smtp_port: parseInt(document.getElementById('smtp-port').value),
-        username: document.getElementById('smtp-username').value.trim(),
-        use_tls: document.getElementById('smtp-use-tls').checked,
+        smtp_host: smtpSettings.host,
+        smtp_port: smtpSettings.port,
+        username: senderEmail,
+        use_tls: smtpSettings.tls,
         recipients: emailRecipients
     };
     
-    // Include password only if it was changed
-    const password = document.getElementById('smtp-password').value;
+    // Include password only if provided
     if (password) {
         emailConfig.password = password;
     }
@@ -424,6 +454,20 @@ function initializeConfigPage() {
     
     // Set up form submit handlers
     document.getElementById('email-form').addEventListener('submit', saveEmailConfiguration);
+    
+    // Auto-detect SMTP settings when sender email changes
+    const senderEmailInput = document.getElementById('sender-email');
+    if (senderEmailInput) {
+        senderEmailInput.addEventListener('blur', function() {
+            const email = this.value.trim();
+            if (email && email.includes('@')) {
+                const settings = autoDetectSMTPSettings(email);
+                document.getElementById('smtp-host').value = settings.host;
+                document.getElementById('smtp-port').value = settings.port;
+                document.getElementById('smtp-use-tls').value = settings.tls;
+            }
+        });
+    }
     document.getElementById('detection-form').addEventListener('submit', saveDetectionConfiguration);
     document.getElementById('logging-form').addEventListener('submit', saveLoggingConfiguration);
     document.getElementById('notifications-form').addEventListener('submit', saveNotificationsConfiguration);

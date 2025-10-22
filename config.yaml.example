@@ -1,60 +1,27 @@
-# IDS Configuration File Example
-# Copy this file to config.yaml and update with your settings
-
-# Email notification settings
 email:
-  # SMTP server configuration
   smtp_host: smtp.gmail.com
   smtp_port: 587
   use_tls: true
-  
-  # SMTP authentication credentials
   username: your-email@example.com
   password: your-app-password
-  
-  # List of email addresses to receive alerts
   recipients:
-    - admin@example.com
-    - security-team@example.com
+  - admin@example.com
+  - security-team@example.com
 
-# Threat detection settings
 detection:
-  # Network interface to monitor (e.g., eth0, wlan0, en0)
-  network_interface: eth0
-  
-  # Number of ports scanned from single source before triggering alert (within 60 seconds)
-  port_scan_threshold: 10
-  
-  # Number of hosts pinged from single source before triggering alert (within 30 seconds)
+  network_interface: "Wi-Fi"  # Windows: "Wi-Fi" or "Ethernet", Linux: "eth0" or "wlan0"
+  port_scan_threshold: 12
   icmp_scan_threshold: 5
-  
-  # Number of failed authentication attempts before triggering alert (within 60 seconds)
   brute_force_threshold: 5
 
-# Logging configuration
 logging:
-  # Log level: DEBUG, INFO, WARNING, ERROR, CRITICAL
   log_level: INFO
-  
-  # Path to log file
   log_file: ids.log
-  
-  # Maximum log file size in megabytes before rotation
   max_log_size_mb: 100
-  
-  # Number of backup log files to keep
   backup_count: 5
 
-# Notification behavior settings
 notification:
-  # Time window in seconds to batch multiple alerts
   batch_window_seconds: 300
-  
-  # Minimum number of threats before batching (lower counts sent immediately)
   batch_threshold: 3
-  
-  # Number of retry attempts for failed email sends
   retry_attempts: 3
-  
-  # Delay in seconds between retry attempts
   retry_delay_seconds: 10

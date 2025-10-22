@@ -64,22 +64,20 @@ class PortScanDetector(ThreatDetector):
         connection_key = (dest_ip, dest_port)
         
         # Track SYN packets (potential scan attempts)
+        # This includes both SYN and SYN-ACK packets
         if flags & 0x02:  # SYN flag is set
             self.syn_packets[source_ip][connection_key] = current_time
-        
-        # Track ACK responses (successful connections)
-        if flags & 0x10:  # ACK flag is set
-            self.ack_responses[source_ip].add(connection_key)
         
         # Clean up old entries outside the time window
         self._cleanup_old_entries(source_ip, current_time)
         
-        # Check if threshold is exceeded
-        unanswered_syns = self._get_unanswered_syns(source_ip)
+        # Check if threshold is exceeded based on total unique ports accessed
+        # Count all SYN packets regardless of ACK responses
+        total_ports_accessed = len(self.syn_packets.get(source_ip, {}))
         
-        if len(unanswered_syns) >= self.threshold:
+        if total_ports_accessed >= self.threshold:
             # Port scan detected
-            scanned_ports = sorted([port for _, port in unanswered_syns])
+            scanned_ports = sorted([port for _, port in self.syn_packets[source_ip].keys()])
             
             threat_event = ThreatEvent(
                 timestamp=current_time,
@@ -92,12 +90,16 @@ class PortScanDetector(ThreatDetector):
                     "port_count": len(scanned_ports),
                     "time_window_seconds": self.time_window,
                     "threshold": self.threshold,
-                    "scan_type": "SYN scan"
+                    "scan_type": "TCP scan"
                 }
             )
             
-            # Clear tracked data for this source to avoid duplicate alerts
-            self._clear_source_data(source_ip)
+            # Don't clear all data - just reset the counter to avoid spam
+            # Keep tracking but reset to allow detection of continued scanning
+            if source_ip in self.syn_packets:
+                # Keep only the most recent ports to avoid immediate re-trigger
+                recent_ports = dict(list(self.syn_packets[source_ip].items())[-5:])
+                self.syn_packets[source_ip] = recent_ports
             
             return threat_event
         
@@ -121,34 +123,3 @@ class PortScanDetector(ThreatDetector):
             ]
             for key in expired_keys:
                 del self.syn_packets[source_ip][key]
-    
-    def _get_unanswered_syns(self, source_ip: str) -> Set[tuple]:
-        """
-        Get SYN packets without corresponding ACK responses.
-        
-        Args:
-            source_ip: Source IP address to check
-            
-        Returns:
-            Set of (dest_ip, dest_port) tuples for unanswered SYNs
-        """
-        if source_ip not in self.syn_packets:
-            return set()
-        
-        all_syns = set(self.syn_packets[source_ip].keys())
-        acks = self.ack_responses.get(source_ip, set())
-        
-        # Return SYNs that don't have corresponding ACKs
-        return all_syns - acks
-    
-    def _clear_source_data(self, source_ip: str) -> None:
-        """
-        Clear all tracked data for a source IP after alert is triggered.
-        
-        Args:
-            source_ip: Source IP address to clear
-        """
-        if source_ip in self.syn_packets:
-            del self.syn_packets[source_ip]
-        if source_ip in self.ack_responses:
-            del self.ack_responses[source_ip]

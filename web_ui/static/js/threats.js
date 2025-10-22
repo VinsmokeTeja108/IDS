@@ -117,6 +117,18 @@ function updateThreatsList() {
             showThreatDetails(threatId);
         });
     });
+    
+    // Add click handlers for delete buttons
+    document.querySelectorAll('.delete-threat-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const threatId = e.target.closest('.delete-threat-btn').dataset.threatId;
+            deleteThreat(threatId);
+        });
+    });
+    
+    // Update Clear All button visibility
+    updateClearAllButton();
 }
 
 // Create threat list item HTML
@@ -141,9 +153,14 @@ function createThreatListItem(threat) {
                         ${threat.description.substring(0, 150)}${threat.description.length > 150 ? '...' : ''}
                     </div>
                 </div>
-                <button class="btn btn-sm btn-outline-primary view-threat-details ms-3" data-threat-id="${threat.id}">
-                    <i class="bi bi-eye"></i> View Details
-                </button>
+                <div class="ms-3 d-flex flex-column gap-2">
+                    <button class="btn btn-sm btn-outline-primary view-threat-details" data-threat-id="${threat.id}">
+                        <i class="bi bi-eye"></i> View
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger delete-threat-btn" data-threat-id="${threat.id}" title="Delete this threat">
+                        <i class="bi bi-x-circle"></i>
+                    </button>
+                </div>
             </div>
         </div>
     `;
@@ -239,6 +256,12 @@ function initializeThreatsPage() {
     document.getElementById('search-input').addEventListener('input', handleFilterChange);
     document.getElementById('clear-filters-btn').addEventListener('click', clearFilters);
     
+    // Set up Clear All button
+    const clearAllBtn = document.getElementById('clear-all-btn');
+    if (clearAllBtn) {
+        clearAllBtn.addEventListener('click', clearAllThreats);
+    }
+    
     // Set up WebSocket event handler
     if (socket) {
         socket.on('threat_detected', handleThreatDetected);
@@ -250,3 +273,69 @@ document.addEventListener('DOMContentLoaded', () => {
     // Wait a bit for socket to be initialized in common.js
     setTimeout(initializeThreatsPage, 100);
 });
+
+
+// Delete a single threat
+async function deleteThreat(threatId) {
+    if (!confirm('Are you sure you want to delete this threat?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/threats/${threatId}`, {
+            method: 'DELETE'
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showToast('Success', 'Threat deleted successfully', 'success');
+            // Remove from local arrays
+            allThreats = allThreats.filter(t => t.id !== threatId);
+            applyFilters();
+            updateClearAllButton();
+        } else {
+            showToast('Error', data.message || 'Failed to delete threat', 'danger');
+        }
+    } catch (error) {
+        console.error('Error deleting threat:', error);
+        showToast('Error', 'Failed to delete threat', 'danger');
+    }
+}
+
+// Clear all threats
+async function clearAllThreats() {
+    if (!confirm('Are you sure you want to delete ALL threats? This cannot be undone!')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/threats', {
+            method: 'DELETE'
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showToast('Success', `Cleared ${data.count} threat(s)`, 'success');
+            allThreats = [];
+            applyFilters();
+            updateClearAllButton();
+        } else {
+            showToast('Error', data.message || 'Failed to clear threats', 'danger');
+        }
+    } catch (error) {
+        console.error('Error clearing threats:', error);
+        showToast('Error', 'Failed to clear threats', 'danger');
+    }
+}
+
+// Update Clear All button visibility
+function updateClearAllButton() {
+    const clearAllBtn = document.getElementById('clear-all-btn');
+    if (clearAllBtn) {
+        clearAllBtn.style.display = allThreats.length > 0 ? 'block' : 'none';
+    }
+}
+
+

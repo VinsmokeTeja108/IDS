@@ -338,6 +338,30 @@ class ThreatStore:
         self.logger.info(f"Cleared all {count} threats from store")
         return count
     
+    def delete_threat(self, threat_id: str) -> bool:
+        """
+        Delete a specific threat by ID.
+        
+        Args:
+            threat_id: Unique identifier of the threat to delete
+        
+        Returns:
+            bool: True if threat was deleted, False if not found
+        """
+        try:
+            for i, threat in enumerate(self.threats):
+                if threat['id'] == threat_id:
+                    del self.threats[i]
+                    self.logger.info(f"Deleted threat {threat_id}")
+                    return True
+            
+            self.logger.warning(f"Threat {threat_id} not found for deletion")
+            return False
+            
+        except Exception as e:
+            self.logger.error(f"Error deleting threat {threat_id}: {e}")
+            return False
+    
     def get_count(self) -> int:
         """
         Get the current number of stored threats.

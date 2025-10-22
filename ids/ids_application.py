@@ -170,7 +170,7 @@ class IDSApplication:
             
             # Data exfiltration detector
             data_exfiltration_detector = DataExfiltrationDetector(
-                threshold_bytes=10485760,  # 10MB
+                threshold_mb=detection_config['data_exfiltration_threshold'],
                 time_window=60
             )
             self.detection_engine.register_detector(data_exfiltration_detector)

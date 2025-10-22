@@ -21,15 +21,16 @@ class DataExfiltrationDetector(ThreatDetector):
     - Triggers alert for suspicious outbound patterns exceeding thresholds
     """
     
-    def __init__(self, threshold_bytes: int = 10485760, time_window: int = 60):
+    def __init__(self, threshold_mb: int = 100, time_window: int = 60):
         """
         Initialize the data exfiltration detector.
         
         Args:
-            threshold_bytes: Data volume threshold in bytes (default: 10MB)
+            threshold_mb: Data volume threshold in megabytes (default: 100MB)
             time_window: Time window in seconds for tracking transfers (default: 60)
         """
-        self.threshold_bytes = threshold_bytes
+        self.threshold_mb = threshold_mb
+        self.threshold_bytes = threshold_mb * 1024 * 1024  # Convert MB to bytes
         self.time_window = time_window
         
         # Track outbound data: {source_ip: {dest_ip: [(timestamp, bytes)]}}

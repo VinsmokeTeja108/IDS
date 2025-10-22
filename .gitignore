@@ -21,14 +21,11 @@ wheels/
 *.egg
 MANIFEST
 
-# Virtual environments
-.env
-.venv
-env/
+# Virtual Environment
 venv/
 ENV/
-env.bak/
-venv.bak/
+env/
+.venv
 
 # IDE
 .vscode/
@@ -36,32 +33,28 @@ venv.bak/
 *.swp
 *.swo
 *~
-
-# OS
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
 
-# Logs
+# IDS Specific
 *.log
-logs/
+*.log.*
+ids.log
+ids.log.*
 
-# Configuration files with sensitive data
+# Configuration (contains sensitive data)
 config.yaml
-*.key
-*.pem
-*.crt
+
+# Kiro
+.kiro/
 
 # Test files
-test_*.py
-*_test.py
-demo_*.py
+test_*.html
+check_network_interfaces.py
+test_packet_capture.py
+
+# Batch files
+*.bat
 
 # Temporary files
 *.tmp
 *.temp
-.cache/

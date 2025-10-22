@@ -36,6 +36,8 @@ def register_routes(app, controller):
     # Threats endpoints
     app.add_url_rule('/api/threats', 'get_threats', get_threats, methods=['GET'])
     app.add_url_rule('/api/threats/<threat_id>', 'get_threat_by_id', get_threat_by_id, methods=['GET'])
+    app.add_url_rule('/api/threats/<threat_id>', 'delete_threat', delete_threat, methods=['DELETE'])
+    app.add_url_rule('/api/threats', 'clear_all_threats', clear_all_threats, methods=['DELETE'])
     app.add_url_rule('/api/threats/stats', 'get_threat_stats', get_threat_stats, methods=['GET'])
     
     # Configuration endpoints
@@ -396,6 +398,82 @@ def get_threat_by_id(threat_id: str):
         logger.error(f"Error retrieving threat {threat_id}: {e}")
         return jsonify({
             'error': 'Failed to retrieve threat',
+            'message': str(e)
+        }), 500
+
+
+def delete_threat(threat_id: str):
+    """
+    DELETE /api/threats/<id>
+    
+    Delete a specific threat by ID.
+    
+    Args:
+        threat_id: Unique identifier of the threat to delete
+    
+    Returns:
+        JSON response with operation result
+    
+    Status Codes:
+        200: Threat deleted successfully
+        404: Threat not found
+        500: Internal server error
+    """
+    try:
+        success = ids_controller.threat_store.delete_threat(threat_id)
+        
+        if success:
+            logger.info(f"Deleted threat: {threat_id}")
+            return jsonify({
+                'success': True,
+                'message': 'Threat deleted successfully',
+                'threat_id': threat_id
+            }), 200
+        else:
+            logger.warning(f"Threat not found for deletion: {threat_id}")
+            return jsonify({
+                'success': False,
+                'error': 'Threat not found',
+                'message': f'No threat found with ID: {threat_id}'
+            }), 404
+    
+    except Exception as e:
+        logger.error(f"Error deleting threat {threat_id}: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Failed to delete threat',
+            'message': str(e)
+        }), 500
+
+
+def clear_all_threats():
+    """
+    DELETE /api/threats
+    
+    Clear all threats from the threat store.
+    
+    Returns:
+        JSON response with operation result
+    
+    Status Codes:
+        200: All threats cleared successfully
+        500: Internal server error
+    """
+    try:
+        count = ids_controller.threat_store.clear_all()
+        
+        logger.info(f"Cleared all threats: {count} threats removed")
+        return jsonify({
+            'success': True,
+            'message': f'All threats cleared successfully',
+            'count': count
+        }), 200
+    
+    except Exception as e:
+        logger.error(f"Error clearing all threats: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Failed to clear threats',
             'message': str(e)
         }), 500
 
