@@ -75,31 +75,39 @@ async function toggleMonitoring() {
     const toggleBtn = document.getElementById('toggle-monitoring-btn');
     if (!toggleBtn) return;
     
-    // Disable button during operation
+    // Show loading state
+    const wasRunning = currentStatus && currentStatus.running;
     toggleBtn.disabled = true;
+    toggleBtn.innerHTML = wasRunning
+        ? '<span class="spinner-border spinner-border-sm me-1"></span> Stopping...'
+        : '<span class="spinner-border spinner-border-sm me-1"></span> Starting...';
     
     try {
-        const endpoint = currentStatus && currentStatus.running ? '/api/stop' : '/api/start';
+        const endpoint = wasRunning ? '/api/stop' : '/api/start';
         const response = await fetch(endpoint, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
+            headers: { 'Content-Type': 'application/json' }
         });
         
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || 'Operation failed');
+        const result = await response.json();
+        
+        if (!result.success) {
+            throw new Error(result.message || 'Operation failed');
         }
         
-        const result = await response.json();
         showToast('Success', result.message || 'Operation completed', 'success');
-        
-        // Refresh status
-        await fetchSystemStatus();
+        // Update status from the result
+        if (result.status) {
+            currentStatus = result.status;
+            updateSystemStatus(result.status);
+        } else {
+            await fetchSystemStatus();
+        }
     } catch (error) {
         console.error('Error toggling monitoring:', error);
         showToast('Error', error.message || 'Failed to toggle monitoring', 'danger');
+        // Restore button state
+        await fetchSystemStatus();
     } finally {
         toggleBtn.disabled = false;
     }
@@ -205,9 +213,18 @@ function handleThreatDetected(threat) {
 }
 
 // Handle real-time status updates via WebSocket
-function handleStatusChanged(status) {
-    updateSystemStatus(status);
-    showToast('Status Changed', `IDS is now ${status.running ? 'active' : 'stopped'}`, 'info');
+function handleStatusChanged(data) {
+    // Re-fetch full status from the API to get the complete object
+    fetchSystemStatus();
+    const state = data.status || 'unknown';
+    if (state === 'running') {
+        showToast('Monitoring Started', 'IDS is now ACTIVE and capturing packets', 'success');
+    } else if (state === 'stopped') {
+        showToast('Monitoring Stopped', 'IDS is now STOPPED', 'info');
+    } else if (state === 'error') {
+        const msg = data.error || data.message || 'Unknown error';
+        showToast('Monitoring Error', msg, 'danger');
+    }
 }
 
 // Handle real-time stats updates via WebSocket
@@ -217,12 +234,10 @@ function handleStatsUpdated(stats) {
 
 // Start auto-refresh for uptime and packet count
 function startAutoRefresh() {
-    // Refresh status every 5 seconds
+    // Always refresh status every 3 seconds (running AND stopped states)
     statusRefreshInterval = setInterval(() => {
-        if (currentStatus && currentStatus.running) {
-            fetchSystemStatus();
-        }
-    }, 5000);
+        fetchSystemStatus();
+    }, 3000);
 }
 
 // Stop auto-refresh

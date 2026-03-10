@@ -85,17 +85,18 @@ class ThreatAnalyzer:
         # Description templates for each threat type
         self.DESCRIPTIONS = {
             ThreatType.PORT_SCAN: (
-                "A port scanning attack has been detected from {source_ip}. "
-                "The attacker is probing the network to identify open ports and services, "
-                "which is typically the reconnaissance phase before a targeted attack. "
-                "This activity indicates an attempt to map your network infrastructure and "
-                "identify potential vulnerabilities."
+                "ATTACKER: {source_ip}  →  TARGET (Your System): {destination_ip}\n\n"
+                "A port scanning attack has been detected. The attacker at {source_ip} is "
+                "probing your system ({destination_ip}) to discover open ports and running "
+                "services. This is typically the reconnaissance phase before a targeted attack, "
+                "aimed at mapping your network and identifying potential vulnerabilities."
             ),
             ThreatType.ICMP_SCAN: (
-                "An ICMP scanning activity (ping sweep) has been detected from {source_ip}. "
-                "The attacker is attempting to discover active hosts on the network by sending "
-                "ICMP echo requests to multiple targets. This is a reconnaissance technique used "
-                "to map the network topology before launching more sophisticated attacks."
+                "ATTACKER: {source_ip}  →  TARGET (Your System): {destination_ip}\n\n"
+                "An ICMP ping sweep has been detected. The attacker at {source_ip} is sending "
+                "ICMP echo requests to your system ({destination_ip}) to confirm it is online. "
+                "This is a reconnaissance technique used before launching more sophisticated "
+                "attacks against active hosts."
             ),
             ThreatType.MALWARE: (
                 "Malware has been detected in network traffic or system activity. "

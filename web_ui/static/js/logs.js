@@ -34,7 +34,8 @@ async function fetchLogs() {
         }
         
         const data = await response.json();
-        displayLogs(data.logs || []);
+        const pageOffset = (currentPage - 1) * logsPerPage;
+        displayLogs(data.logs || [], pageOffset);
         updatePagination(data.total || 0, data.page || 1, data.total_pages || 1);
     } catch (error) {
         console.error('Error fetching logs:', error);
@@ -60,14 +61,14 @@ function showLoading(show) {
 }
 
 // Display logs in table
-function displayLogs(logs) {
+function displayLogs(logs, pageOffset) {
     const tableBody = document.getElementById('logs-table-body');
     if (!tableBody) return;
     
     if (!logs || logs.length === 0) {
         tableBody.innerHTML = `
             <tr>
-                <td colspan="3" class="text-center text-muted">
+                <td colspan="4" class="text-center text-muted">
                     <div class="py-4">
                         <i class="bi bi-file-text" style="font-size: 3rem;"></i>
                         <p class="mt-2">No logs found</p>
@@ -79,27 +80,46 @@ function displayLogs(logs) {
     }
     
     let html = '';
-    logs.forEach(log => {
-        html += createLogRow(log);
+    logs.forEach((log, idx) => {
+        // pageOffset is the absolute index of the first item on this page in newest-first order
+        html += createLogRow(log, pageOffset + idx);
     });
     
     tableBody.innerHTML = html;
 }
 
 // Create log row HTML
-function createLogRow(log) {
+function createLogRow(log, logIndex) {
     const eventTypeBadge = getEventTypeBadge(log.event_type || log.level);
     const timestamp = formatTimestamp(log.timestamp);
-    const details = log.message || log.details || JSON.stringify(log);
+    
+    // Properly render details — could be string, object, or missing
+    let details;
+    if (log.message) {
+        details = typeof log.message === 'object' ? JSON.stringify(log.message) : log.message;
+    } else if (log.details) {
+        details = typeof log.details === 'object' ? JSON.stringify(log.details, null, 2) : log.details;
+    } else {
+        // Render all remaining keys as JSON
+        const { timestamp: _t, event_type: _et, level: _l, ...rest } = log;
+        details = JSON.stringify(rest);
+    }
     
     return `
-        <tr>
+        <tr id="log-row-${logIndex}">
             <td class="text-nowrap">${timestamp}</td>
             <td>${eventTypeBadge}</td>
-            <td class="text-break">${escapeHtml(details)}</td>
+            <td class="text-break"><small>${escapeHtml(details)}</small></td>
+            <td class="text-center">
+                <button class="btn btn-sm btn-outline-danger py-0 px-1" title="Delete this log entry"
+                    onclick="deleteLog(${logIndex})">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </td>
         </tr>
     `;
 }
+
 
 // Get event type badge
 function getEventTypeBadge(eventType) {
@@ -225,6 +245,48 @@ function stopAutoRefresh() {
     }
 }
 
+// Clear all logs
+async function clearAllLogs() {
+    if (!confirm('Are you sure you want to clear ALL log entries? This cannot be undone.')) {
+        return;
+    }
+    try {
+        const response = await fetch('/api/logs', { method: 'DELETE' });
+        const result = await response.json();
+        if (result.success) {
+            showToast('Logs Cleared', 'All log entries have been cleared.', 'success');
+            currentPage = 1;
+            fetchLogs();
+        } else {
+            showToast('Error', result.message || 'Failed to clear logs', 'danger');
+        }
+    } catch (error) {
+        console.error('Error clearing logs:', error);
+        showToast('Error', 'Failed to clear logs', 'danger');
+    }
+}
+
+// Delete a single log entry by its absolute newest-first index
+async function deleteLog(logIndex) {
+    try {
+        const response = await fetch(`/api/logs/${logIndex}`, { method: 'DELETE' });
+        const result = await response.json();
+        if (result.success) {
+            // Remove row from DOM immediately for instant feedback
+            const row = document.getElementById(`log-row-${logIndex}`);
+            if (row) row.remove();
+            totalLogs = Math.max(0, totalLogs - 1);
+            // Re-fetch to keep indices consistent
+            fetchLogs();
+        } else {
+            showToast('Error', result.message || 'Failed to delete log entry', 'danger');
+        }
+    } catch (error) {
+        console.error('Error deleting log entry:', error);
+        showToast('Error', 'Failed to delete log entry', 'danger');
+    }
+}
+
 // Initialize logs page
 function initializeLogsPage() {
     // Fetch initial logs
@@ -233,6 +295,7 @@ function initializeLogsPage() {
     // Set up event listeners
     document.getElementById('search-logs-btn').addEventListener('click', handleSearch);
     document.getElementById('refresh-logs-btn').addEventListener('click', handleRefresh);
+    document.getElementById('clear-all-logs-btn').addEventListener('click', clearAllLogs);
     document.getElementById('prev-page-btn').addEventListener('click', goToPreviousPage);
     document.getElementById('next-page-btn').addEventListener('click', goToNextPage);
     document.getElementById('auto-refresh-logs').addEventListener('change', toggleAutoRefresh);

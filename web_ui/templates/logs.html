@@ -59,9 +59,14 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="bi bi-file-text"></i> Log Entries</h5>
-                <button id="refresh-logs-btn" class="btn btn-sm btn-outline-primary">
-                    <i class="bi bi-arrow-clockwise"></i> Refresh
-                </button>
+                <div class="d-flex gap-2">
+                    <button id="refresh-logs-btn" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-arrow-clockwise"></i> Refresh
+                    </button>
+                    <button id="clear-all-logs-btn" class="btn btn-sm btn-danger">
+                        <i class="bi bi-trash3-fill"></i> Clear All Logs
+                    </button>
+                </div>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -71,11 +76,12 @@
                                 <th style="width: 180px;">Timestamp</th>
                                 <th style="width: 120px;">Event Type</th>
                                 <th>Details</th>
+                                <th style="width: 70px;" class="text-center">Delete</th>
                             </tr>
                         </thead>
                         <tbody id="logs-table-body">
                             <tr>
-                                <td colspan="3" class="text-center text-muted">
+                                <td colspan="4" class="text-center text-muted">
                                     <div class="py-4">
                                         <i class="bi bi-file-text" style="font-size: 3rem;"></i>
                                         <p class="mt-2">No logs available</p>
@@ -85,6 +91,7 @@
                         </tbody>
                     </table>
                 </div>
+
                 
                 <!-- Loading Indicator -->
                 <div id="logs-loading" class="text-center py-4" style="display: none;">

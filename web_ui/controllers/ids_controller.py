@@ -43,6 +43,7 @@ class IDSController:
         self.monitoring_thread: Optional[threading.Thread] = None
         self.logger = logging.getLogger(__name__)
         self.start_time: Optional[datetime] = None
+        self._last_error: Optional[str] = None  # Tracks errors from monitoring thread
         
         self.logger.info(f"IDSController initialized with config: {config_path}")
     
@@ -76,14 +77,21 @@ class IDSController:
             
             self.logger.info("Starting IDS monitoring...")
             
-            # Create new IDS application instance
-            self.ids_app = IDSApplication(self.config_path)
+            # Create new IDS application instance — pass event_bus and threat_store
+            self.ids_app = IDSApplication(
+                self.config_path,
+                event_bus=self.event_bus,
+                threat_store=self.threat_store
+            )
             
-            # Initialize the IDS
+            # Initialize the IDS components
             self.ids_app.initialize()
             
-            # Integrate with event bus and threat store
+            # Integrate with event bus and threat store (sets up enhanced_run)
             self._integrate_ids_with_web_ui()
+            
+            # Clear any previous error
+            self._last_error = None
             
             # Start monitoring in background thread
             self.monitoring_thread = threading.Thread(
@@ -92,6 +100,43 @@ class IDSController:
                 name="IDS-Monitoring-Thread"
             )
             self.monitoring_thread.start()
+            
+            # Wait up to 3 seconds for the IDS to start or an error to surface
+            import time
+            deadline = time.time() + 3.0
+            while time.time() < deadline:
+                time.sleep(0.2)
+                # Check for immediate error set by the controller thread
+                if self._last_error:
+                    break
+                # Check if thread died without setting _running
+                if not self.monitoring_thread.is_alive():
+                    break
+                # Check if the packet capture itself errored (e.g. permission denied)
+                if (self.ids_app and
+                        self.ids_app.packet_capture and
+                        self.ids_app.packet_capture._capture_error):
+                    err = self.ids_app.packet_capture._capture_error
+                    self._last_error = str(err)
+                    break
+                # Check if IDS is now running
+                if self.ids_app._running:
+                    break
+            
+            # Check if something went wrong
+            if self._last_error or not self.monitoring_thread.is_alive():
+                error_msg = self._last_error or 'Monitoring thread stopped unexpectedly'
+                self.logger.error(f"IDS monitoring failed to start: {error_msg}")
+                self.event_bus.on_status_changed('stopped', {})
+                # Don't null ids_app here - let the monitoring thread finish naturally
+                # to avoid NoneType crash in enhanced_run's finally block
+                self.start_time = None
+                self._last_error = None
+                return {
+                    'success': False,
+                    'message': error_msg,
+                    'status': self.get_status()
+                }
             
             # Record start time
             self.start_time = datetime.now()
@@ -222,7 +267,9 @@ class IDSController:
                     threat_count = stats.get('threats_detected', 0)
                 
                 if self.ids_app.config_manager:
-                    interface = self.ids_app.config_manager.get('detection.network_interface', 'N/A')
+                    interface = self.ids_app.config_manager.get('detection.network_interface') or ''
+                    if not interface or interface.strip() in ('', 'N/A', 'auto', 'default'):
+                        interface = self._detect_active_interface()
             
             status = {
                 'running': is_running,
@@ -563,8 +610,14 @@ class IDSController:
             self.ids_app.run()
             self.logger.info("Monitoring thread completed")
         except Exception as e:
-            self.logger.error(f"Error in monitoring thread: {e}")
-            self.event_bus.on_status_changed('error', {'error': str(e)})
+            error_msg = str(e)
+            self.logger.error(f"Error in monitoring thread: {error_msg}")
+            self._last_error = error_msg  # Surface error back to start_monitoring
+            # Only emit error status if monitoring actually started successfully
+            # (start_time is set). If startup failed, the API already returned
+            # the error — no need to fire another WebSocket event.
+            if self.start_time is not None:
+                self.event_bus.on_status_changed('error', {'error': error_msg, 'message': error_msg})
     
     def _integrate_ids_with_web_ui(self) -> None:
         """
@@ -577,7 +630,7 @@ class IDSController:
         original_run = self.ids_app.run
         
         def enhanced_run():
-            """Enhanced run method that captures threats"""
+            """Enhanced run method that captures threats and integrates with Web UI"""
             try:
                 # Get network interface from configuration
                 interface = self.ids_app.config_manager.get('detection.network_interface')
@@ -590,6 +643,17 @@ class IDSController:
                 
                 # Start packet capture
                 self.ids_app.packet_capture.start_capture(interface)
+                
+                # Brief pause to allow capture thread to initialize
+                import time as _time
+                _time.sleep(0.3)
+                
+                # Check for immediate capture error (e.g., permission denied)
+                if self.ids_app.packet_capture._capture_error:
+                    err = self.ids_app.packet_capture._capture_error
+                    raise err
+                
+                # Mark as running
                 self.ids_app._running = True
                 
                 # Main detection loop
@@ -598,6 +662,9 @@ class IDSController:
                     # Check if shutdown was requested
                     if self.ids_app._shutdown_requested:
                         break
+                    
+                    if packet is None:
+                        continue
                     
                     packet_count += 1
                     
@@ -614,7 +681,7 @@ class IDSController:
                         # Send notification
                         self.ids_app.notification_service.notify(threat_analysis)
                         
-                        # NEW: Store threat and emit event for web UI
+                        # Store threat and emit event for web UI
                         threat_id = self.threat_store.add_threat(threat_analysis)
                         self.event_bus.on_threat_detected(threat_analysis)
                         
@@ -630,8 +697,8 @@ class IDSController:
                             self.threat_store.add_threat(attacker_analysis)
                             self.event_bus.on_threat_detected(attacker_analysis)
                     
-                    # Periodic status update (every 1000 packets)
-                    if packet_count % 1000 == 0:
+                    # Periodic status update (every 500 packets)
+                    if packet_count % 500 == 0:
                         stats = self.ids_app.detection_engine.get_statistics()
                         self.ids_app.logger.log_system_event(
                             "Periodic status update",
@@ -642,11 +709,12 @@ class IDSController:
                         self.event_bus.on_stats_updated(self.get_statistics())
                         
             except Exception as e:
-                self.ids_app.logger.log_system_event(
-                    "Unexpected error in main loop",
-                    level="ERROR",
-                    details={"error": str(e)}
-                )
+                if self.ids_app.logger:
+                    self.ids_app.logger.log_system_event(
+                        "Unexpected error in main loop",
+                        level="ERROR",
+                        details={"error": str(e)}
+                    )
                 raise
             finally:
                 self.ids_app._running = False
@@ -654,6 +722,43 @@ class IDSController:
         # Replace run method with enhanced version
         self.ids_app.run = enhanced_run
     
+    def _detect_active_interface(self) -> str:
+        """
+        Detect the active network interface name (e.g. 'Wi-Fi', 'Ethernet').
+        Tries psutil first for friendly names, falls back to socket-based detection.
+        """
+        try:
+            import psutil
+            import socket
+
+            # Find the primary outbound IP
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            try:
+                s.connect(("8.8.8.8", 80))
+                primary_ip = s.getsockname()[0]
+            finally:
+                s.close()
+
+            # Match it against psutil net interfaces
+            for name, addrs in psutil.net_if_addrs().items():
+                for addr in addrs:
+                    if addr.family == socket.AF_INET and addr.address == primary_ip:
+                        return name  # e.g. "Wi-Fi", "Ethernet"
+        except Exception:
+            pass
+
+        # Fallback: try Scapy IFACES
+        try:
+            from scapy.all import conf
+            iface = conf.iface
+            name = getattr(iface, 'name', None) or getattr(iface, 'description', None)
+            if name:
+                return name
+        except Exception:
+            pass
+
+        return "Unknown"
+
     def _format_uptime(self, seconds: int) -> str:
         """
         Format uptime seconds into human-readable string.

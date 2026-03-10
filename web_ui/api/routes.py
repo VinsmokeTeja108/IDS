@@ -51,6 +51,8 @@ def register_routes(app, controller):
     
     # Logs endpoints
     app.add_url_rule('/api/logs', 'get_logs', get_logs, methods=['GET'])
+    app.add_url_rule('/api/logs', 'clear_logs', clear_logs, methods=['DELETE'])
+    app.add_url_rule('/api/logs/<int:log_index>', 'delete_log_entry', delete_log_entry, methods=['DELETE'])
     app.add_url_rule('/api/logs/search', 'search_logs', search_logs, methods=['GET'])
     
     # Notifications endpoints
@@ -1140,6 +1142,123 @@ def get_logs():
             'error': 'Failed to retrieve logs',
             'message': str(e)
         }), 500
+
+
+def _get_log_file_path():
+    """
+    Helper: Resolve absolute path to the IDS log file from config.
+    Returns a Path object or None if not found.
+    """
+    import yaml
+    from pathlib import Path
+    try:
+        config_file = Path(ids_controller.config_path)
+        if not config_file.exists():
+            return None
+        with open(config_file, 'r') as f:
+            config = yaml.safe_load(f) or {}
+        log_file_path = config.get('logging', {}).get('log_file', 'ids.log')
+        return Path(log_file_path)
+    except Exception:
+        return None
+
+
+def clear_logs():
+    """
+    DELETE /api/logs
+
+    Clear all entries from the IDS log file.
+
+    Returns:
+        JSON response with operation result
+
+    Status Codes:
+        200: Logs cleared successfully
+        500: Internal server error
+    """
+    try:
+        log_file = _get_log_file_path()
+        if log_file is None:
+            return jsonify({'success': False, 'message': 'Log file not found'}), 500
+
+        # Truncate the log file
+        open(log_file, 'w').close()
+
+        logger.info("All logs cleared")
+        return jsonify({
+            'success': True,
+            'message': 'All logs cleared successfully'
+        }), 200
+
+    except Exception as e:
+        logger.error(f"Error clearing logs: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+def delete_log_entry(log_index: int):
+    """
+    DELETE /api/logs/<log_index>
+
+    Delete a specific log entry by its zero-based index in the
+    most-recent-first ordered list.
+
+    Args:
+        log_index: Zero-based index of the entry to delete (from newest)
+
+    Returns:
+        JSON response with operation result
+
+    Status Codes:
+        200: Log entry deleted
+        404: Index out of range
+        500: Internal server error
+    """
+    try:
+        import json
+        log_file = _get_log_file_path()
+        if log_file is None or not log_file.exists():
+            return jsonify({'success': False, 'message': 'Log file not found'}), 500
+
+        # Read all valid JSON log lines
+        with open(log_file, 'r', encoding='utf-8') as f:
+            raw_lines = [line.strip() for line in f if line.strip()]
+
+        # Parse valid JSON entries; keep track of raw lines for non-JSON lines
+        entries = []  # list of (original_line_index, raw_line)
+        for i, line in enumerate(raw_lines):
+            try:
+                json.loads(line)  # validate JSON
+                entries.append((i, line))
+            except json.JSONDecodeError:
+                pass  # skip malformed lines but remember them
+
+        # The UI shows newest-first (reversed), so map log_index into entries list
+        if log_index < 0 or log_index >= len(entries):
+            return jsonify({
+                'success': False,
+                'message': f'Log index {log_index} out of range (total: {len(entries)})'
+            }), 404
+
+        # Reverse order: newest first index 0 => oldest last in list
+        reversed_entries = list(reversed(entries))
+        original_line_idx, _ = reversed_entries[log_index]
+
+        # Remove that raw line and rewrite the file
+        del raw_lines[original_line_idx]
+        with open(log_file, 'w', encoding='utf-8') as f:
+            f.write('\n'.join(raw_lines))
+            if raw_lines:
+                f.write('\n')
+
+        logger.info(f"Deleted log entry at index {log_index}")
+        return jsonify({
+            'success': True,
+            'message': f'Log entry deleted'
+        }), 200
+
+    except Exception as e:
+        logger.error(f"Error deleting log entry {log_index}: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 
 def search_logs():

@@ -253,7 +253,8 @@ def main():
             port=args.port,
             debug=args.debug,
             use_reloader=False,  # Disable reloader to prevent duplicate threads
-            log_output=True
+            log_output=True,
+            allow_unsafe_werkzeug=True  # Required for Flask-SocketIO 5.6+ with Werkzeug dev server
         )
     
     except KeyboardInterrupt:

@@ -6,6 +6,20 @@ let reconnectAttempts = 0;
 const MAX_RECONNECT_ATTEMPTS = 5;
 let reconnectTimer = null;
 let connectionLostShown = false;
+let pageIsNavigating = false;  // True when user clicked a link (suppress disconnect toast)
+
+// Mark navigation so the disconnect toast isn't shown
+window.addEventListener('beforeunload', () => { pageIsNavigating = true; });
+
+// Catch link clicks early before the beforeunload event fires
+document.addEventListener('click', (e) => {
+    const link = e.target.closest('a');
+    if (link && link.href && !link.href.startsWith('javascript:') && !link.getAttribute('href').startsWith('#')) {
+        if (!link.target || link.target !== '_blank') {
+            pageIsNavigating = true;
+        }
+    }
+});
 
 // Initialize Socket.IO connection
 function initializeWebSocket() {
@@ -15,64 +29,70 @@ function initializeWebSocket() {
         reconnectionDelayMax: 5000,
         reconnectionAttempts: MAX_RECONNECT_ATTEMPTS
     });
-    
-    socket.on('connect', function() {
+
+    socket.on('connect', function () {
         console.log('WebSocket connected');
         reconnectAttempts = 0;
         connectionLostShown = false;
         updateConnectionStatus('connected');
-        
-        // Show success toast if this was a reconnection
+
+        // Show success toast only on genuine reconnection (not first load)
         if (reconnectTimer) {
             clearTimeout(reconnectTimer);
             reconnectTimer = null;
             showToast('Connected', 'Successfully reconnected to server', 'success');
         }
     });
-    
-    socket.on('disconnect', function(reason) {
+
+    socket.on('disconnect', function (reason) {
         console.log('WebSocket disconnected:', reason);
         updateConnectionStatus('disconnected');
-        
-        // Show notification after a short delay to avoid flashing on quick reconnects
+
+        // Don't show toast if user is just navigating to another page
+        if (pageIsNavigating) return;
+
+        // Show notification after a delay — avoids flashing on quick reconnects
         if (!connectionLostShown) {
             reconnectTimer = setTimeout(() => {
-                showToast('Connection Lost', 'Attempting to reconnect...', 'warning');
-                connectionLostShown = true;
-            }, 2000);
+                if (!pageIsNavigating) {
+                    showToast('Connection Lost', 'Attempting to reconnect...', 'warning');
+                    connectionLostShown = true;
+                }
+            }, 3000);
         }
     });
-    
-    socket.on('connect_error', function(error) {
+
+    socket.on('connect_error', function (error) {
         console.error('WebSocket connection error:', error);
         updateConnectionStatus('error');
         reconnectAttempts++;
-        
+
         if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS && !connectionLostShown) {
             showToast('Connection Failed', 'Unable to connect to server. Please check if the backend is running.', 'danger');
             connectionLostShown = true;
         }
     });
-    
-    socket.on('reconnect_attempt', function(attemptNumber) {
+
+    socket.on('reconnect_attempt', function (attemptNumber) {
         console.log(`Reconnection attempt ${attemptNumber}`);
         updateConnectionStatus('connecting', attemptNumber);
     });
-    
-    socket.on('reconnect_failed', function() {
+
+    socket.on('reconnect_failed', function () {
         console.error('Reconnection failed after maximum attempts');
         updateConnectionStatus('error');
         showToast('Connection Failed', 'Unable to reconnect to server. Please refresh the page.', 'danger');
     });
 }
 
+
 // Update connection status indicator
 function updateConnectionStatus(status, attemptNumber = null) {
     const statusElement = document.getElementById('connection-status');
     if (!statusElement) return;
-    
+
     statusElement.classList.remove('bg-success', 'bg-danger', 'bg-secondary', 'bg-warning', 'connected', 'disconnected', 'connecting', 'error');
-    
+
     if (status === 'connected') {
         statusElement.classList.add('bg-success', 'connected');
         statusElement.innerHTML = '<i class="bi bi-circle-fill"></i> Connected';
@@ -99,13 +119,13 @@ function updateConnectionStatus(status, attemptNumber = null) {
 function showConnectionErrorBanner(message = null) {
     const banner = document.getElementById('connection-error-banner');
     const messageElement = document.getElementById('connection-error-message');
-    
+
     if (!banner) return;
-    
+
     if (message && messageElement) {
         messageElement.textContent = message;
     }
-    
+
     banner.style.display = 'block';
     banner.classList.add('show');
 }
@@ -113,9 +133,9 @@ function showConnectionErrorBanner(message = null) {
 // Hide connection error banner
 function hideConnectionErrorBanner() {
     const banner = document.getElementById('connection-error-banner');
-    
+
     if (!banner) return;
-    
+
     banner.classList.remove('show');
     setTimeout(() => {
         banner.style.display = 'none';
@@ -129,20 +149,20 @@ function showToast(title, message, type = 'info') {
     const toastMessage = document.getElementById('toast-message');
     const toastHeader = toastElement.querySelector('.toast-header');
     const toastBody = toastElement.querySelector('.toast-body');
-    
+
     if (!toastElement || !toastTitle || !toastMessage) return;
-    
+
     // Set content
     toastTitle.textContent = title;
     toastMessage.textContent = message;
-    
+
     // Reset all classes
     toastHeader.classList.remove('bg-success', 'bg-danger', 'bg-warning', 'bg-info', 'text-white', 'text-dark');
     toastBody.classList.remove('bg-success', 'bg-danger', 'bg-warning', 'bg-info', 'text-white', 'text-dark');
-    
+
     // Set icon based on type
     let icon = 'bi-info-circle';
-    
+
     // Set color and icon based on type
     if (type === 'success') {
         toastHeader.classList.add('bg-success', 'text-white');
@@ -161,14 +181,14 @@ function showToast(title, message, type = 'info') {
         toastBody.classList.add('bg-info', 'text-white');
         icon = 'bi-info-circle-fill';
     }
-    
+
     // Add icon to title
     toastTitle.innerHTML = `<i class="bi ${icon} me-2"></i>${title}`;
-    
+
     // Show toast with auto-dismiss after 5 seconds
-    const toast = new bootstrap.Toast(toastElement, { 
+    const toast = new bootstrap.Toast(toastElement, {
         delay: 5000,
-        autohide: true 
+        autohide: true
     });
     toast.show();
 }
@@ -182,11 +202,11 @@ function formatTimestamp(timestamp) {
 // Format uptime
 function formatUptime(seconds) {
     if (!seconds || seconds < 0) return '-';
-    
+
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = Math.floor(seconds % 60);
-    
+
     if (hours > 0) {
         return `${hours}h ${minutes}m`;
     } else if (minutes > 0) {
@@ -218,15 +238,15 @@ function getThreatTypeDisplay(type) {
 // Show loading spinner on button
 function showButtonLoading(button) {
     if (!button) return;
-    
+
     // Store original content
     button.dataset.originalContent = button.innerHTML;
     button.dataset.originalDisabled = button.disabled;
-    
+
     // Add loading class and disable button
     button.classList.add('loading');
     button.disabled = true;
-    
+
     // Set loading content
     button.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Loading...';
 }
@@ -234,16 +254,16 @@ function showButtonLoading(button) {
 // Hide loading spinner on button
 function hideButtonLoading(button) {
     if (!button) return;
-    
+
     // Remove loading class
     button.classList.remove('loading');
-    
+
     // Restore original content and state
     if (button.dataset.originalContent) {
         button.innerHTML = button.dataset.originalContent;
         delete button.dataset.originalContent;
     }
-    
+
     if (button.dataset.originalDisabled !== undefined) {
         button.disabled = button.dataset.originalDisabled === 'true';
         delete button.dataset.originalDisabled;
@@ -255,13 +275,13 @@ function hideButtonLoading(button) {
 // Show loading overlay on element
 function showLoadingOverlay(element, message = 'Loading...') {
     if (!element) return;
-    
+
     // Make element position relative if not already
     const position = window.getComputedStyle(element).position;
     if (position === 'static') {
         element.style.position = 'relative';
     }
-    
+
     // Create overlay
     const overlay = document.createElement('div');
     overlay.className = 'loading-overlay';
@@ -273,14 +293,14 @@ function showLoadingOverlay(element, message = 'Loading...') {
             <div class="mt-3 fw-bold">${message}</div>
         </div>
     `;
-    
+
     element.appendChild(overlay);
 }
 
 // Hide loading overlay on element
 function hideLoadingOverlay(element) {
     if (!element) return;
-    
+
     const overlay = element.querySelector('.loading-overlay');
     if (overlay) {
         overlay.remove();
@@ -290,7 +310,7 @@ function hideLoadingOverlay(element) {
 // Show loading state for card
 function showCardLoading(cardElement) {
     if (!cardElement) return;
-    
+
     cardElement.classList.add('loading');
     showLoadingOverlay(cardElement);
 }
@@ -298,7 +318,7 @@ function showCardLoading(cardElement) {
 // Hide loading state for card
 function hideCardLoading(cardElement) {
     if (!cardElement) return;
-    
+
     cardElement.classList.remove('loading');
     hideLoadingOverlay(cardElement);
 }
@@ -306,9 +326,9 @@ function hideCardLoading(cardElement) {
 // Show skeleton loading for table
 function showTableSkeleton(tableBody, rows = 5, cols = 4) {
     if (!tableBody) return;
-    
+
     tableBody.innerHTML = '';
-    
+
     for (let i = 0; i < rows; i++) {
         const row = document.createElement('tr');
         for (let j = 0; j < cols; j++) {
@@ -323,9 +343,9 @@ function showTableSkeleton(tableBody, rows = 5, cols = 4) {
 // Show loading spinner in container
 function showLoadingSpinner(container, size = 'md') {
     if (!container) return;
-    
+
     const sizeClass = size === 'sm' ? 'spinner-border-sm' : size === 'lg' ? 'spinner-border-lg' : '';
-    
+
     container.innerHTML = `
         <div class="text-center py-5">
             <div class="spinner-border text-primary ${sizeClass}" role="status">
@@ -337,6 +357,6 @@ function showLoadingSpinner(container, size = 'md') {
 }
 
 // Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     initializeWebSocket();
 });

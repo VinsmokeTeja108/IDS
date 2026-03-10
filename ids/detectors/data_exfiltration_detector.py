@@ -1,5 +1,6 @@
 """Data exfiltration detector implementation"""
 
+import socket
 from datetime import datetime, timedelta
 from typing import Optional, Dict, List
 from collections import defaultdict
@@ -10,31 +11,48 @@ from ids.detectors.base_detector import ThreatDetector
 from ids.models.data_models import ThreatEvent, ThreatType
 
 
+def _get_local_ips() -> set:
+    ips = set()
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ips.add(s.getsockname()[0])
+        s.close()
+    except Exception:
+        pass
+    try:
+        for info in socket.getaddrinfo(socket.gethostname(), None):
+            addr = info[4][0]
+            if ':' not in addr:
+                ips.add(addr)
+    except Exception:
+        pass
+    ips.add('127.0.0.1')
+    return ips
+
+
+_LOCAL_IPS = _get_local_ips()
+
+
 class DataExfiltrationDetector(ThreatDetector):
     """
-    Detects data exfiltration attempts by monitoring outbound traffic volume
-    and identifying unusual large data transfers.
-    
-    Detection logic:
-    - Monitors outbound traffic volume per destination
-    - Tracks data transfer sizes over time windows
-    - Triggers alert for suspicious outbound patterns exceeding thresholds
+    Detects unusual large outbound data transfers from our machine to external hosts.
+    Threshold is high (500MB/5min) to avoid false positives from normal browsing.
     """
-    
-    def __init__(self, threshold_mb: int = 100, time_window: int = 60):
+
+    def __init__(self, threshold_mb: int = 500, time_window: int = 300):
         """
-        Initialize the data exfiltration detector.
-        
         Args:
-            threshold_mb: Data volume threshold in megabytes (default: 100MB)
-            time_window: Time window in seconds for tracking transfers (default: 60)
+            threshold_mb: Data volume threshold in MB (default: 500MB).
+            time_window: Time window in seconds (default: 300s = 5 minutes).
         """
         self.threshold_mb = threshold_mb
-        self.threshold_bytes = threshold_mb * 1024 * 1024  # Convert MB to bytes
+        self.threshold_bytes = threshold_mb * 1024 * 1024
         self.time_window = time_window
-        
-        # Track outbound data: {source_ip: {dest_ip: [(timestamp, bytes)]}}
+
+        # {source_ip: {dest_ip: [(timestamp, bytes)]}}
         self.outbound_data: Dict[str, Dict[str, List[tuple]]] = defaultdict(lambda: defaultdict(list))
+
     
     def detect(self, packet: Packet) -> Optional[ThreatEvent]:
         """

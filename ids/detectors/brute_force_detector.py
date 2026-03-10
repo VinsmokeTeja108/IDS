@@ -1,5 +1,6 @@
 """Brute force attack detector implementation"""
 
+import socket
 from datetime import datetime, timedelta
 from typing import Optional, Dict, List
 from collections import defaultdict
@@ -8,6 +9,29 @@ from scapy.layers.inet import IP, TCP
 
 from ids.detectors.base_detector import ThreatDetector
 from ids.models.data_models import ThreatEvent, ThreatType
+
+
+def _get_local_ips() -> set:
+    ips = set()
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ips.add(s.getsockname()[0])
+        s.close()
+    except Exception:
+        pass
+    try:
+        for info in socket.getaddrinfo(socket.gethostname(), None):
+            addr = info[4][0]
+            if ':' not in addr:
+                ips.add(addr)
+    except Exception:
+        pass
+    ips.add('127.0.0.1')
+    return ips
+
+
+_LOCAL_IPS = _get_local_ips()
 
 
 class BruteForceDetector(ThreatDetector):
@@ -22,9 +46,9 @@ class BruteForceDetector(ThreatDetector):
     """
     
     # Common authentication ports to monitor
-    AUTH_PORTS = {22, 3389, 21}  # SSH, RDP, FTP
+    AUTH_PORTS = {22, 3389, 21, 23, 25, 110, 143}  # SSH, RDP, FTP, Telnet, SMTP, POP3, IMAP
     
-    def __init__(self, threshold: int = 5, time_window: int = 60):
+    def __init__(self, threshold: int = 8, time_window: int = 60):
         """
         Initialize the brute force detector.
         
@@ -58,11 +82,13 @@ class BruteForceDetector(ThreatDetector):
         source_ip = ip_layer.src
         dest_ip = ip_layer.dst
         dest_port = tcp_layer.dport
-        flags = tcp_layer.flags
+        flags = int(tcp_layer.flags)
         
-        # Only track RST packets on authentication ports
-        # RST flag indicates connection reset (failed authentication)
-        if not (flags & 0x04) or dest_port not in self.AUTH_PORTS:  # RST flag
+        # Only RST packets on auth ports coming FROM external sources TO our machine
+        if not (flags & 0x04) or dest_port not in self.AUTH_PORTS:
+            return None
+        # Only count inbound — destination must be our IP, source must be external
+        if dest_ip not in _LOCAL_IPS or source_ip in _LOCAL_IPS:
             return None
         
         current_time = datetime.now()
